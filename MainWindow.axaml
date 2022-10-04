@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450" x:Class="InterpeterDesktop.MainWindow" Title="InterpeterDesktop">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" />
+                <MenuItem Header="_Save" />
+                <MenuItem Header="Save _as" />
+                <Separator />
+                <MenuItem Header="_Quit" Click="_onExitRequested" />
+            </MenuItem>
+            <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" />
+            <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" />
+            <MenuItem Header="_About" />
+        </Menu>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+            <StackPanel>
+                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" />
+                <!-- List for displaying compilation, syntax, etc. errors-->
+                <StackPanel Name="ErrorMsgBox"></StackPanel>
+            </StackPanel>
+            <!-- Using data grid to dispaly memory cells-->
+            <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch"></DataGrid>
+        </StackPanel>
+    </DockPanel>
+</Window>
