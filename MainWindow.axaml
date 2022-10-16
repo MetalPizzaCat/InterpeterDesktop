@@ -21,25 +21,24 @@
             <!-- Using data grid to dispaly memory cells-->
             <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Адресс" Binding="{Binding [0]}" IsReadOnly="True" />
-                    <DataGridTextColumn Header="0" Binding="{ Binding [1] }" />
-                    <DataGridTextColumn Header="1" Binding="{ Binding [2] }" />
-                    <DataGridTextColumn Header="2" Binding="{ Binding [3] }" />
-                    <DataGridTextColumn Header="3" Binding="{ Binding [4] }" />
-                    <DataGridTextColumn Header="4" Binding="{ Binding [5] }" />
-                    <DataGridTextColumn Header="5" Binding="{ Binding [6] }" />
-                    <DataGridTextColumn Header="6" Binding="{ Binding [7] }" />
-                    <DataGridTextColumn Header="7" Binding="{ Binding [8] }" />
-                    <DataGridTextColumn Header="8" Binding="{ Binding [9] }" />
-                    <DataGridTextColumn Header="9" Binding="{ Binding [10]}" />
-                    <DataGridTextColumn Header="A" Binding="{ Binding [11]}" />
-                    <DataGridTextColumn Header="B" Binding="{ Binding [12]}" />
-                    <DataGridTextColumn Header="C" Binding="{ Binding [13]}" />
-                    <DataGridTextColumn Header="D" Binding="{ Binding [14]}" />
-                    <DataGridTextColumn Header="E" Binding="{ Binding [15]}" />
-                    <DataGridTextColumn Header="F" Binding="{ Binding [16]}" />
+                    <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />
+                    <DataGridTextColumn Header="1" Binding="{ Binding X1 }" />
+                    <DataGridTextColumn Header="2" Binding="{ Binding X2 }" />
+                    <DataGridTextColumn Header="3" Binding="{ Binding X3 }" />
+                    <DataGridTextColumn Header="4" Binding="{ Binding X4 }" />
+                    <DataGridTextColumn Header="5" Binding="{ Binding X5 }" />
+                    <DataGridTextColumn Header="6" Binding="{ Binding X6 }" />
+                    <DataGridTextColumn Header="7" Binding="{ Binding X7 }" />
+                    <DataGridTextColumn Header="8" Binding="{ Binding X8 }" />
+                    <DataGridTextColumn Header="9" Binding="{ Binding X9 }" />
+                    <DataGridTextColumn Header="A" Binding="{ Binding XA }" />
+                    <DataGridTextColumn Header="B" Binding="{ Binding XB }" />
+                    <DataGridTextColumn Header="C" Binding="{ Binding XC }" />
+                    <DataGridTextColumn Header="D" Binding="{ Binding XD }" />
+                    <DataGridTextColumn Header="E" Binding="{ Binding XE }" />
+                    <DataGridTextColumn Header="F" Binding="{ Binding XF }" />
                 </DataGrid.Columns>
-
             </DataGrid>
         </StackPanel>
     </DockPanel>

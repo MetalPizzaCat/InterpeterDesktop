@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System;
+using Avalonia.Data;
 
 /// <summary>
 /// Stores memory information and provides interface for 
@@ -14,31 +15,26 @@ public class Memory
     /// Data grid friendly version of the memory data representation
     /// </summary>
     /// <returns></returns>
-    private ObservableCollection<ObservableCollection<string>> _memoryDisplayGrid = new ObservableCollection<ObservableCollection<string>>();
+    private ObservableCollection<MemoryGridRow> _memoryDisplayGrid = new ObservableCollection<MemoryGridRow>();
     /// <summary>
     /// Memory data
     /// </summary>
     private byte[] _memory = new byte[944];
-    public ObservableCollection<ObservableCollection<string>> MemoryDisplayGrid { get => _memoryDisplayGrid; /*set => _memoryDisplayGrid = value;*/ }
-
-    private void _onGridChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    public ObservableCollection<MemoryGridRow> MemoryDisplayGrid { get => _memoryDisplayGrid; /*set => _memoryDisplayGrid = value;*/ }
+    public void OnMemoryValueChanged(int address, byte value)
     {
-        if (e.Action == NotifyCollectionChangedAction.Replace)
-        {
-            _memory[(_memoryDisplayGrid.IndexOf(sender as ObservableCollection<string>) * 0xf + e.NewStartingIndex)] = Convert.ToByte((e.NewItems[0] as string), 16);
-            System.Console.WriteLine($"Changed at {((_memoryDisplayGrid.IndexOf(sender as ObservableCollection<string>) * 0xf + e.NewStartingIndex) + 0x800).ToString("X2")} to {e.OldItems}");
-        }
+        _memory[address - 0x800] = value;
     }
     public Memory()
     {
         for (int i = 0x800; i < 0xbb0; i += 0x10)
         {
-            var row = new ObservableCollection<string> { i.ToString("X2") };
+            MemoryGridRow row = new MemoryGridRow(i);
             for (int j = 0; j <= 0xf; j++)
             {
-                row.Add(_memory[((i + j) - 0x800)].ToString("X2"));
+                row.Memory[j] = _memory[((i + j) - 0x800)];
             }
-            row.CollectionChanged += _onGridChanged;
+            row.OnRowValueChanged += OnMemoryValueChanged;
             _memoryDisplayGrid.Add(row);
         }
     }

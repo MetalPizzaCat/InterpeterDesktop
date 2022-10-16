@@ -22,7 +22,7 @@ namespace InterpeterDesktop
             {
                 MemoryGrid.Columns.Add(new DataGridTextColumn { Header = $"{i.ToString("X2")}", Binding = new Avalonia.Data.Binding($"[{i + 1}]") });
             }*/
-            MemoryGrid.AutoGenerateColumns = false;
+            //MemoryGrid.AutoGenerateColumns = false;
             MemoryGrid.Items = _interpreter.Memory.MemoryDisplayGrid;
             this.DataContext = this;
         }
