@@ -16,13 +16,6 @@ namespace InterpeterDesktop
         {
             InitializeComponent();
             _interpreter = new Interpreter.Interpreter();
-            /*
-            MemoryGrid.Columns.Add(new DataGridTextColumn { Header = $"Address", Binding = new Avalonia.Data.Binding($"[{0}]"), IsReadOnly = true });
-            for (int i = 0; i <= 0xf; i++)
-            {
-                MemoryGrid.Columns.Add(new DataGridTextColumn { Header = $"{i.ToString("X2")}", Binding = new Avalonia.Data.Binding($"[{i + 1}]") });
-            }*/
-            //MemoryGrid.AutoGenerateColumns = false;
             MemoryGrid.Items = _interpreter.Memory.MemoryDisplayGrid;
             this.DataContext = this;
         }
