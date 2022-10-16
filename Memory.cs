@@ -21,26 +21,20 @@ public class Memory
     /// </summary>
     private byte[] _memory = new byte[944];
     public ObservableCollection<MemoryGridRow> MemoryDisplayGrid { get => _memoryDisplayGrid; /*set => _memoryDisplayGrid = value;*/ }
-    /*
-        private void _onGridChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            //TODO: Add input validation
-            if (e.Action == NotifyCollectionChangedAction.Replace)
-            {
-                _memory[(_memoryDisplayGrid.IndexOf(sender as ObservableCollection<string>) * 0xf + e.NewStartingIndex)] = Convert.ToByte((e.NewItems[0] as string), 16);
-                System.Console.WriteLine($"Changed at {((_memoryDisplayGrid.IndexOf(sender as ObservableCollection<string>) * 0xf + e.NewStartingIndex) + 0x800).ToString("X2")} to {e.OldItems}");
-            }
-        }*/
+    public void OnMemoryValueChanged(int address, byte value)
+    {
+        _memory[address - 0x800] = value;
+    }
     public Memory()
     {
         for (int i = 0x800; i < 0xbb0; i += 0x10)
         {
-            var row = new MemoryGridRow(i);
+            MemoryGridRow row = new MemoryGridRow(i);
             for (int j = 0; j <= 0xf; j++)
             {
                 row.Memory[j] = _memory[((i + j) - 0x800)];
             }
-            //row.CollectionChanged += _onGridChanged;
+            row.OnRowValueChanged += OnMemoryValueChanged;
             _memoryDisplayGrid.Add(row);
         }
     }
