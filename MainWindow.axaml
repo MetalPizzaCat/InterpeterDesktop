@@ -8,7 +8,7 @@
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
-            <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" />
+            <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" Click="_runButtonPressed" />
             <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" />
             <MenuItem Header="_About" />
         </Menu>
@@ -19,7 +19,28 @@
                 <StackPanel Name="ErrorMsgBox"></StackPanel>
             </StackPanel>
             <!-- Using data grid to dispaly memory cells-->
-            <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch"></DataGrid>
+            <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Адресс" Binding="{Binding [0]}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="0" Binding="{ Binding [1] }" />
+                    <DataGridTextColumn Header="1" Binding="{ Binding [2] }" />
+                    <DataGridTextColumn Header="2" Binding="{ Binding [3] }" />
+                    <DataGridTextColumn Header="3" Binding="{ Binding [4] }" />
+                    <DataGridTextColumn Header="4" Binding="{ Binding [5] }" />
+                    <DataGridTextColumn Header="5" Binding="{ Binding [6] }" />
+                    <DataGridTextColumn Header="6" Binding="{ Binding [7] }" />
+                    <DataGridTextColumn Header="7" Binding="{ Binding [8] }" />
+                    <DataGridTextColumn Header="8" Binding="{ Binding [9] }" />
+                    <DataGridTextColumn Header="9" Binding="{ Binding [10]}" />
+                    <DataGridTextColumn Header="A" Binding="{ Binding [11]}" />
+                    <DataGridTextColumn Header="B" Binding="{ Binding [12]}" />
+                    <DataGridTextColumn Header="C" Binding="{ Binding [13]}" />
+                    <DataGridTextColumn Header="D" Binding="{ Binding [14]}" />
+                    <DataGridTextColumn Header="E" Binding="{ Binding [15]}" />
+                    <DataGridTextColumn Header="F" Binding="{ Binding [16]}" />
+                </DataGrid.Columns>
+
+            </DataGrid>
         </StackPanel>
     </DockPanel>
 </Window>
