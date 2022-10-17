@@ -9,12 +9,19 @@
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
             <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" Click="_runButtonPressed" />
-            <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" />
+            <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
+            <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
             <MenuItem Header="_About" />
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
-                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" />
+                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True">
+;this is a test
+mvi a,90
+mov b,a
+sta 800
+hlt
+                </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <StackPanel Name="ErrorMsgBox"></StackPanel>
             </StackPanel>

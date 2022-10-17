@@ -41,4 +41,90 @@ namespace Interpreter
             LeftArgument = leftArgument;
         }
     }
+
+    public abstract class OperationBase
+    {
+        /// <summary>
+        /// Name of the operation in the assembly
+        /// </summary>
+        public string Name;
+
+        protected Interpreter Interpreter;
+
+        protected OperationBase(string name, Interpreter interpreter)
+        {
+            Name = name;
+            Interpreter = interpreter;
+        }
+
+        public abstract void Execute();
+    }
+
+    public class RegisterMemoryMoveOperation : OperationBase
+    {
+        public readonly string Destination;
+        public readonly string Source;
+
+        public RegisterMemoryMoveOperation(string destination, string source, Interpreter interpreter) : base("mov", interpreter)
+        {
+            Destination = destination;
+            Source = source;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.SetRegisterValue(Destination, Interpreter.GetRegisterValue(Source));
+        }
+    }
+
+    public class RegisterMemoryAssignOperation : OperationBase
+    {
+        public readonly string Destination;
+        public readonly byte Source;
+
+        public RegisterMemoryAssignOperation(string destination, byte source, Interpreter interpreter) : base("mvi", interpreter)
+        {
+            Destination = destination;
+            Source = source;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.SetRegisterValue(Destination, Source);
+        }
+    }
+
+    public class StoreAccumulatorOperation : OperationBase
+    {
+        public readonly ushort Destination;
+        public StoreAccumulatorOperation(ushort Destination, Interpreter interpreter) : base("sta", interpreter)
+        {
+            if (Destination < 0x800 || Destination > 0xbb0)
+            {
+                throw new System.Exception("Address must be in 800 to bb0 range");
+            }
+        }
+
+        public override void Execute()
+        {
+            Interpreter.Memory[Destination] = Interpreter.GetRegisterValue("A");
+        }
+    }
+
+    /// <summary>
+    /// This operation stops execution of code
+    /// </summary>
+    public class HaltOperation : OperationBase
+    {
+        public HaltOperation(Interpreter interpreter) : base("hlt", interpreter)
+        {
+
+        }
+
+        public override void Execute()
+        {
+            //TODO: ehm, idk do smth
+            //throw new System.NotImplementedException();
+        }
+    }
 }
