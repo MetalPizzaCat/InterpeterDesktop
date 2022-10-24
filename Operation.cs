@@ -131,6 +131,25 @@ namespace Interpreter
     }
 
     /// <summary>
+    /// Adds register to accumulator, discarding carry
+    /// </summary>
+    public class AddAccumulatorOperation : OperationBase
+    {
+        public readonly string Source;
+        public AddAccumulatorOperation(string source, Interpreter interpreter) : base("sta", interpreter)
+        {
+            Source = source;
+        }
+
+        public override void Execute()
+        {
+            int value = ((Interpreter.GetRegisterValue("A") + Interpreter.GetRegisterValue(Source)) & 0xFF);
+            Interpreter.CheckFlags((ushort)value);
+            Interpreter.SetRegisterValue("A", (byte)value);
+        }
+    }
+
+    /// <summary>
     /// This operation stops execution of code
     /// </summary>
     public class HaltOperation : OperationBase

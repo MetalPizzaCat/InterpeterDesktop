@@ -96,6 +96,9 @@ namespace Interpreter
                         case "lda":
                             operations.Add(new LoadAccumulatorOperation(Convert.ToUInt16(matches[1].Value, 16), interpreter));
                             break;
+                        case "add":
+                            operations.Add(new AddAccumulatorOperation(matches[1].Value, interpreter));
+                            break;
                         case "hlt":
                             operations.Add(new HaltOperation(interpreter));
                             break;

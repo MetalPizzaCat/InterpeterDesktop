@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Timers;
+using System.ComponentModel;
 
 namespace Interpreter
 {
@@ -16,24 +17,161 @@ namespace Interpreter
             System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
-    public class ProcessorFlags
+    public class ProcessorFlags : INotifyPropertyChanged
     {
-        public bool S = false;
-        public bool Z = false;
-        public bool Ac = false;
-        public bool P = false;
-        public bool C = false;
+        private bool _s = false;
+        private bool _z = false;
+        private bool _ac = false;
+        private bool _p = false;
+        private bool _c = false;
+
+
+        public bool S
+        {
+            get => _s;
+            set
+            {
+                _s = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("S"));
+            }
+        }
+
+
+        public bool Z
+        {
+            get => _z;
+            set
+            {
+                _z = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Z"));
+            }
+        }
+
+
+        public bool Ac
+        {
+            get => _ac;
+            set
+            {
+                _ac = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Ac"));
+            }
+        }
+
+
+        public bool P
+        {
+            get => _p;
+            set
+            {
+                _p = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("P"));
+            }
+        }
+
+
+        public bool C
+        {
+            get => _c;
+            set
+            {
+                _c = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("C"));
+            }
+        }
+
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 
-    public class Registers
+    public class Registers : INotifyPropertyChanged
     {
-        public byte A { get; set; } = 0;
-        public byte B { get; set; } = 0;
-        public byte C { get; set; } = 0;
-        public byte D { get; set; } = 0;
-        public byte E { get; set; } = 0;
-        public byte H { get; set; } = 0;
-        public byte L { get; set; } = 0;
+        private byte _a = 0;
+        private byte _b = 0;
+        private byte _c = 0;
+        private byte _d = 0;
+        private byte _e = 0;
+        private byte _h = 0;
+        private byte _l = 0;
+
+        public byte A
+        {
+            get => _a;
+            set
+            {
+                _a = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("A"));
+            }
+        }
+
+
+
+        public byte B
+        {
+            get => _b;
+            set
+            {
+                _b = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("B"));
+            }
+        }
+
+
+        public byte C
+        {
+            get => _c;
+            set
+            {
+                _c = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("C"));
+            }
+        }
+
+
+        public byte D
+        {
+            get => _d;
+            set
+            {
+                _d = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("D"));
+            }
+        }
+
+
+        public byte E
+        {
+            get => _e;
+            set
+            {
+                _e = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("E"));
+            }
+        }
+
+
+        public byte H
+        {
+            get => _h;
+            set
+            {
+                _h = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("H"));
+            }
+        }
+
+
+        public byte L
+        {
+            get => _l;
+            set
+            {
+                _l = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("L"));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
     public class Interpreter
     {
@@ -55,6 +193,9 @@ namespace Interpreter
 
         private Registers _registers;
         private ProcessorFlags _flags;
+
+        public ProcessorFlags Flags => _flags;
+        public Registers Registers => _registers;
 
         private Memory _memory;
 
@@ -140,6 +281,37 @@ namespace Interpreter
             _timer = new Timer(300.0);
             _timer.Enabled = false;
             _timer.Elapsed += _onTimerTimeout;
+        }
+
+        /// <summary>
+        /// Checks parity of the number by check if the amount of 1s in the number is even <para/>
+        /// I have no idea what is the parity for, but original processor had it so why not
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        private bool _parity(ushort val)
+        {
+            int count = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                count += val & 1;
+                val >>= 1;
+            }
+            return (count % 2) == 0;
+        }
+
+        /// <summary>
+        /// Updates flags based on the value
+        /// </summary>
+        public void CheckFlags(ushort value)
+        {
+            //everything except carry works on one cell sized value
+            ushort clean = (ushort)(value & 0xff);
+            _flags.S = 0x80 == (clean & 0x80);//just check if the sign bit is true
+            _flags.Z = clean == 0;
+            _flags.Ac = clean > 0x09;
+            _flags.P = _parity(clean);
+            _flags.C = value > 0xff;
         }
 
         public void Step()

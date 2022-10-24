@@ -12,6 +12,8 @@ namespace InterpreterDesktop
 
         private Interpreter.Interpreter _interpreter;
 
+        public Interpreter.ProcessorFlags Flags => _interpreter.Flags;
+        public Interpreter.Registers Registers => _interpreter.Registers;
         public MainWindow()
         {
             InitializeComponent();

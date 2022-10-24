@@ -29,28 +29,83 @@
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <StackPanel Name="ErrorMsgBox"></StackPanel>
             </StackPanel>
-            <!-- Using data grid to dispaly memory cells-->
-            <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
-                    <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />
-                    <DataGridTextColumn Header="1" Binding="{ Binding X1 }" />
-                    <DataGridTextColumn Header="2" Binding="{ Binding X2 }" />
-                    <DataGridTextColumn Header="3" Binding="{ Binding X3 }" />
-                    <DataGridTextColumn Header="4" Binding="{ Binding X4 }" />
-                    <DataGridTextColumn Header="5" Binding="{ Binding X5 }" />
-                    <DataGridTextColumn Header="6" Binding="{ Binding X6 }" />
-                    <DataGridTextColumn Header="7" Binding="{ Binding X7 }" />
-                    <DataGridTextColumn Header="8" Binding="{ Binding X8 }" />
-                    <DataGridTextColumn Header="9" Binding="{ Binding X9 }" />
-                    <DataGridTextColumn Header="A" Binding="{ Binding XA }" />
-                    <DataGridTextColumn Header="B" Binding="{ Binding XB }" />
-                    <DataGridTextColumn Header="C" Binding="{ Binding XC }" />
-                    <DataGridTextColumn Header="D" Binding="{ Binding XD }" />
-                    <DataGridTextColumn Header="E" Binding="{ Binding XE }" />
-                    <DataGridTextColumn Header="F" Binding="{ Binding XF }" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">
+                    <StackPanel>
+                        <TextBlock>A</TextBlock>
+                        <TextBlock Text="{Binding Registers.A ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>B</TextBlock>
+                        <TextBlock Text="{Binding Registers.B ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>C</TextBlock>
+                        <TextBlock Text="{Binding Registers.C ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>D</TextBlock>
+                        <TextBlock Text="{Binding Registers.D ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>E</TextBlock>
+                        <TextBlock Text="{Binding Registers.E ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>H</TextBlock>
+                        <TextBlock Text="{Binding Registers.H ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>L</TextBlock>
+                        <TextBlock Text="{Binding Registers.L ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">
+                    <StackPanel>
+                        <TextBlock>S</TextBlock>
+                        <TextBlock Text="{Binding Flags.S ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>Z</TextBlock>
+                        <TextBlock Text="{Binding Flags.Z ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>Ac</TextBlock>
+                        <TextBlock Text="{Binding Flags.Ac ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>P</TextBlock>
+                        <TextBlock Text="{Binding Flags.P ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock>C</TextBlock>
+                        <TextBlock Text="{Binding Flags.C ,StringFormat={}{0:X2}}"></TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                <!-- Using data grid to dispaly memory cells-->
+                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />
+                        <DataGridTextColumn Header="1" Binding="{ Binding X1 }" />
+                        <DataGridTextColumn Header="2" Binding="{ Binding X2 }" />
+                        <DataGridTextColumn Header="3" Binding="{ Binding X3 }" />
+                        <DataGridTextColumn Header="4" Binding="{ Binding X4 }" />
+                        <DataGridTextColumn Header="5" Binding="{ Binding X5 }" />
+                        <DataGridTextColumn Header="6" Binding="{ Binding X6 }" />
+                        <DataGridTextColumn Header="7" Binding="{ Binding X7 }" />
+                        <DataGridTextColumn Header="8" Binding="{ Binding X8 }" />
+                        <DataGridTextColumn Header="9" Binding="{ Binding X9 }" />
+                        <DataGridTextColumn Header="A" Binding="{ Binding XA }" />
+                        <DataGridTextColumn Header="B" Binding="{ Binding XB }" />
+                        <DataGridTextColumn Header="C" Binding="{ Binding XC }" />
+                        <DataGridTextColumn Header="D" Binding="{ Binding XD }" />
+                        <DataGridTextColumn Header="E" Binding="{ Binding XE }" />
+                        <DataGridTextColumn Header="F" Binding="{ Binding XF }" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
         </StackPanel>
     </DockPanel>
 </Window>
