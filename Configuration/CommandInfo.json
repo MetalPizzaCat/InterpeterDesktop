@@ -1,0 +1,27 @@
+{
+    "Commands": {
+        "mvi": {
+            "Arguments": [
+                0,
+                1
+            ]
+        },
+        "mov": {
+            "Arguments": [
+                0,
+                0
+            ]
+        },
+        "sta": {
+            "Arguments": [
+                2
+            ]
+        },
+        "lda": {
+            "Arguments": [
+                2
+            ]
+        },
+        "hlt": {}
+    }
+}

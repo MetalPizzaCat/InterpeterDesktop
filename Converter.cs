@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System;
-
+using System.Linq;
 namespace Interpreter
 {
     /// <summary>
@@ -27,6 +27,9 @@ namespace Interpreter
         /// <param name="code"></param>
         public static List<OperationBase> Prepare(string code, Interpreter interpreter)
         {
+            string infoText = System.IO.File.ReadAllText("./Configuration/CommandInfo.json");
+            ProcessorCommandsInfo info = Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessorCommandsInfo>(infoText) ?? throw new NullReferenceException("Unable to process configuration");
+
             List<OperationBase> operations = new List<OperationBase>();
             string[] lines = code.Split("\n");
             foreach (string line in lines)
@@ -42,65 +45,67 @@ namespace Interpreter
                 {
                     throw new InterpreterInvalidOperationException();
                 }
-                switch (matches[0].Value)
+                if (info.Commands.ContainsKey(matches[0].Value))
                 {
-                    case "mov":
+                    int argumentCount = info.Commands[matches[0].Value].Arguments.Count;
+                    if (argumentCount != matches.Count - 1)
+                    {
+                        throw new InterpreterInvalidOperationException($"Operation expected {argumentCount} found {matches.Count - 1}");
+                    }
+                    for (int i = 1; i < matches.Count; i++)
+                    {
+                        switch (info.Commands[matches[0].Value].Arguments[i - 1])
                         {
-                            if (matches.Count != 3)
-                            {
-                                throw new InterpreterInvalidOperationException("Mov operation needs 2 arguments, name of the destination and name of the source register");
-                            }
-                            if (Regex.IsMatch(matches[1].Value, "[A-z]") && Regex.IsMatch(matches[2].Value, "[A-z]"))
-                            {
-                                operations.Add(new RegisterMemoryMoveOperation(matches[1].Value, matches[2].Value, interpreter));
-                            }
-                            else
-                            {
-                                throw new InterpreterInvalidOperationException("Arguments for mov operation must be one letter register names");
-                            }
+                            case CommandArgumentType.RegisterName:
+                                if (!Regex.IsMatch(matches[i].Value, "[A-z]"))
+                                {
+                                    throw new InterpreterInvalidOperationException($"Argument {i - 1} can only contain one letter: name of the register");
+                                }
+                                break;
+                            case CommandArgumentType.Int8:
+                                if (!Regex.IsMatch(matches[i].Value, @"\d"))
+                                {
+                                    throw new InterpreterInvalidOperationException($"Argument {i - 1} can only contain numbers");
+                                }
+                                break;
+                            case CommandArgumentType.Int16:
+                                if (!Regex.IsMatch(matches[i].Value, @"\d"))
+                                {
+                                    throw new InterpreterInvalidOperationException($"Argument {i - 1} can only contain numbers");
+                                }
+                                ushort addr = Convert.ToUInt16(matches[i].Value, 16);
+                                if (addr < 0x800 || addr > 0xbb0)
+                                {
+                                    throw new InterpreterInvalidOperationException($"Argument {i - 1} is an address and must be in 800 to bb0 range");
+                                }
+                                break;
                         }
-                        break;
-                    case "mvi":
-                        {
-                            if (matches.Count != 3)
-                            {
-                                throw new InterpreterInvalidOperationException("Mov operation needs 2 arguments, name of the destination and value");
-                            }
-                            if (Regex.IsMatch(matches[1].Value, "[A-z]") && Regex.IsMatch(matches[2].Value, @"\d"))
-                            {
-                                operations.Add(new RegisterMemoryAssignOperation(matches[1].Value, Convert.ToByte(matches[2].Value, 16), interpreter));
-                            }
-                            else
-                            {
-                                throw new InterpreterInvalidOperationException("Arguments for mov operation must be one letter register name and byte value");
-                            }
-                        }
-                        break;
-                    case "sta":
-                        if (matches.Count != 2)
-                        {
-                            throw new InterpreterInvalidOperationException("Sta operation needs only destination address in 800 to b00 range");
-                        }
-                        if (Regex.IsMatch(matches[1].Value, @"\d"))
-                        {
+                    }
+
+                    switch (matches[0].Value)
+                    {
+                        case "mov":
+                            operations.Add(new RegisterMemoryMoveOperation(matches[1].Value, matches[2].Value, interpreter));
+                            break;
+                        case "mvi":
+                            operations.Add(new RegisterMemoryAssignOperation(matches[1].Value, Convert.ToByte(matches[2].Value, 16), interpreter));
+                            break;
+                        case "sta":
                             ushort addr = Convert.ToUInt16(matches[1].Value, 16);
-                            if (addr < 0x800 || addr > 0xbb0)
-                            {
-                                throw new InterpreterInvalidOperationException("Address out of range");
-                            }
                             operations.Add(new StoreAccumulatorOperation(addr, interpreter));
-                        }
-                        break;
-                    case "hlt":
-                        if (matches.Count != 1)
-                        {
-                            throw new InterpreterInvalidOperationException("HTL has no arguments");
-                        }
-                        operations.Add(new HaltOperation(interpreter));
-                        break;
-                    default:
-                        throw new InterpreterInvalidOperationException("Unknown operation encountered");
+                            break;
+                        case "lda":
+                            break;
+                        case "hlt":
+                            operations.Add(new HaltOperation(interpreter));
+                            break;
+                    }
                 }
+                else
+                {
+                    throw new InterpreterInvalidOperationException("Unknown operation encountered");
+                }
+
                 foreach (Match match in matches)
                 {
                     System.Console.Write($"{match.Value}<=>");

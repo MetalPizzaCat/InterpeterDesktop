@@ -4,7 +4,7 @@ using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
 
 
-namespace InterpeterDesktop
+namespace InterpreterDesktop
 {
 
     public partial class MainWindow : Window
