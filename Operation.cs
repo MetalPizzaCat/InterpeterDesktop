@@ -115,7 +115,7 @@ namespace Interpreter
     public class LoadAccumulatorOperation : OperationBase
     {
         public readonly ushort Source;
-        public LoadAccumulatorOperation(ushort source, Interpreter interpreter) : base("sta", interpreter)
+        public LoadAccumulatorOperation(ushort source, Interpreter interpreter) : base("lda", interpreter)
         {
             Source = source;
             if (Source < 0x800 || Source > 0xbb0)
@@ -136,16 +136,47 @@ namespace Interpreter
     public class AddAccumulatorOperation : OperationBase
     {
         public readonly string Source;
-        public AddAccumulatorOperation(string source, Interpreter interpreter) : base("sta", interpreter)
+        public AddAccumulatorOperation(string source, Interpreter interpreter) : base("add", interpreter)
         {
             Source = source;
         }
 
         public override void Execute()
         {
-            int value = ((Interpreter.GetRegisterValue("A") + Interpreter.GetRegisterValue(Source)) & 0xFF);
+            int value = ((Interpreter.GetRegisterValue("A") + Interpreter.GetRegisterValue(Source)));
             Interpreter.CheckFlags((ushort)value);
-            Interpreter.SetRegisterValue("A", (byte)value);
+            Interpreter.SetRegisterValue("A", (byte)(value & 0xFF));
+        }
+    }
+
+    /// <summary>
+    /// Adds register to accumulator, discarding carry
+    /// </summary>
+    public class AddAccumulatorCarryOperation : OperationBase
+    {
+        public readonly string Source;
+        public AddAccumulatorCarryOperation(string source, Interpreter interpreter) : base("adc", interpreter)
+        {
+            Source = source;
+        }
+
+        public override void Execute()
+        {
+            int value = ((Interpreter.GetRegisterValue("A") + Interpreter.GetRegisterValue(Source))) + (Interpreter.Flags.C ? 1 : 0);
+            Interpreter.CheckFlags((ushort)value);
+            Interpreter.SetRegisterValue("A", (byte)(value & 0xFF));
+        }
+    }
+
+    public class SetCarryBitOperation : OperationBase
+    {
+        public SetCarryBitOperation(Interpreter interpreter) : base("stc", interpreter)
+        {
+        }
+
+        public override void Execute()
+        {
+            Interpreter.Flags.C = true;
         }
     }
 

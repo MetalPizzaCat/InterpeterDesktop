@@ -28,6 +28,7 @@ namespace InterpreterDesktop
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
                 _interpreter.Operations = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
+                _interpreter.ResetProcessor();
                 _interpreter.Run();
             }
         }

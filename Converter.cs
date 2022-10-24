@@ -99,6 +99,12 @@ namespace Interpreter
                         case "add":
                             operations.Add(new AddAccumulatorOperation(matches[1].Value, interpreter));
                             break;
+                        case "adc":
+                            operations.Add(new AddAccumulatorCarryOperation(matches[1].Value, interpreter));
+                            break;
+                        case "stc":
+                            operations.Add(new SetCarryBitOperation(interpreter));
+                            break;
                         case "hlt":
                             operations.Add(new HaltOperation(interpreter));
                             break;
