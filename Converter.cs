@@ -91,10 +91,10 @@ namespace Interpreter
                             operations.Add(new RegisterMemoryAssignOperation(matches[1].Value, Convert.ToByte(matches[2].Value, 16), interpreter));
                             break;
                         case "sta":
-                            ushort addr = Convert.ToUInt16(matches[1].Value, 16);
-                            operations.Add(new StoreAccumulatorOperation(addr, interpreter));
+                            operations.Add(new StoreAccumulatorOperation(Convert.ToUInt16(matches[1].Value, 16), interpreter));
                             break;
                         case "lda":
+                            operations.Add(new LoadAccumulatorOperation(Convert.ToUInt16(matches[1].Value, 16), interpreter));
                             break;
                         case "hlt":
                             operations.Add(new HaltOperation(interpreter));
@@ -103,7 +103,7 @@ namespace Interpreter
                 }
                 else
                 {
-                    throw new InterpreterInvalidOperationException("Unknown operation encountered");
+                    throw new InterpreterInvalidOperationException($"Unknown operation encountered: {line}");
                 }
 
                 foreach (Match match in matches)

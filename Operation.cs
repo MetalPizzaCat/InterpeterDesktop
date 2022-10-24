@@ -97,8 +97,9 @@ namespace Interpreter
     public class StoreAccumulatorOperation : OperationBase
     {
         public readonly ushort Destination;
-        public StoreAccumulatorOperation(ushort Destination, Interpreter interpreter) : base("sta", interpreter)
+        public StoreAccumulatorOperation(ushort destination, Interpreter interpreter) : base("sta", interpreter)
         {
+            Destination = destination;
             if (Destination < 0x800 || Destination > 0xbb0)
             {
                 throw new System.Exception("Address must be in 800 to bb0 range");
@@ -107,7 +108,25 @@ namespace Interpreter
 
         public override void Execute()
         {
-            Interpreter.Memory[Destination] = Interpreter.GetRegisterValue("A");
+            Interpreter.Memory[(ushort)(Destination - 0x800)] = Interpreter.GetRegisterValue("A");
+        }
+    }
+
+    public class LoadAccumulatorOperation : OperationBase
+    {
+        public readonly ushort Source;
+        public LoadAccumulatorOperation(ushort source, Interpreter interpreter) : base("sta", interpreter)
+        {
+            Source = source;
+            if (Source < 0x800 || Source > 0xbb0)
+            {
+                throw new System.Exception("Address must be in 800 to bb0 range");
+            }
+        }
+
+        public override void Execute()
+        {
+            Interpreter.SetRegisterValue("A", Interpreter.Memory[(ushort)(Source - 0x800)]);
         }
     }
 
