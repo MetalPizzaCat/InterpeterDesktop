@@ -137,7 +137,7 @@ namespace Interpreter
             //TODO: uncomment to get access to full 64kb
             //_memory = new Memory(0, ushort.MaxValue, 0);
             _memory = new Memory();
-            _timer = new Timer(300.0);
+            _timer = new Timer(100.0);
             _timer.Enabled = false;
             _timer.Elapsed += _onTimerTimeout;
         }
