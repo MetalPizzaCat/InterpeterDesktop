@@ -140,6 +140,11 @@ namespace Interpreter
             _timer.Elapsed += _onTimerTimeout;
         }
 
+        public void JumpTo(string destination)
+        {
+            _operationCounter = _jumpDestinations[destination];
+        }
+
         /// <summary>
         /// Checks parity of the number by check if the amount of 1s in the number is even <para/>
         /// I have no idea what is the parity for, but original processor had it so why not

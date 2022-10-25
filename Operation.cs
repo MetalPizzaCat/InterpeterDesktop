@@ -180,6 +180,21 @@ namespace Interpreter
         }
     }
 
+    public class JumpOperation : OperationBase
+    {
+        public string Destination;
+
+        public JumpOperation(string dst,Interpreter interpreter) : base("jmp", interpreter)
+        {
+            Destination = dst;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.JumpTo(Destination);
+        }
+    }
+
     /// <summary>
     /// This operation stops execution of code
     /// </summary>

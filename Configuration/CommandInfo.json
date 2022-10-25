@@ -1,4 +1,13 @@
 {
+    "JumpCommands": [
+        "jmp",
+        "call",
+        "jn",
+        "jp"
+    ],
+    "StaticAddressCommands": [
+        "sta"
+    ],
     "Commands": {
         "mvi": {
             "Arguments": [
@@ -30,6 +39,11 @@
         "adc": {
             "Arguments": [
                 0
+            ]
+        },
+        "jmp": {
+            "Arguments": [
+                4
             ]
         },
         "hlt": {},

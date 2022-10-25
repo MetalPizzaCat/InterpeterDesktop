@@ -53,6 +53,7 @@ namespace Interpreter
     {
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex OperationSeparator = new Regex(@"([a-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Checks if given collection of regex matches is a valid operation
@@ -96,6 +97,12 @@ namespace Interpreter
                                 return ($"Argument {i - 1} is an address and must be in 800 to bb0 range");
                             }
                             break;
+                        case CommandArgumentType.LabelName:
+                            if (!Regex.IsMatch(input[i].Value, "[A-z]+"))
+                            {
+                                return ($"Argument {i - 1} can only contain one letter: name of the register");
+                            }
+                            break;
                     }
                 }
             }
@@ -116,6 +123,10 @@ namespace Interpreter
 
             ProcessedCodeInfo result = new ProcessedCodeInfo();
             List<OperationBase> operations = new List<OperationBase>();
+            //jumps that were referred to by call/jump commands
+            //used for checking if jump destination is valid at assemble time
+            Dictionary<int, string> referredJumps = new Dictionary<int, string>();
+            Dictionary<int, int> referredAddresses = new Dictionary<int, int>();
             int lineId = 0;
             string[] lines = code.Split("\n");
             foreach (string line in lines)
@@ -124,6 +135,12 @@ namespace Interpreter
                 //ignore lines that have only comments or whitespaces
                 if (string.IsNullOrWhiteSpace(cleanLine))
                 {
+                    lineId++;
+                    continue;
+                }
+                if (JumpLabelRegex.IsMatch(cleanLine))
+                {
+                    result.JumpDestinations.Add(JumpLabelRegex.Match(cleanLine).Value, result.Operations.Count - 1);
                     lineId++;
                     continue;
                 }
@@ -140,6 +157,15 @@ namespace Interpreter
                     result.Errors.Add(lineId, error);
                     lineId++;
                     continue;
+                }
+
+                if (info.JumpCommands.Contains(matches[0].Value))
+                {
+                    referredJumps.Add(lineId, matches[1].Value);
+                }
+                if (info.StaticAddressCommands.Contains(matches[0].Value))
+                {
+                    referredAddresses.Add(lineId, Convert.ToUInt16(matches[1].Value, 16));
                 }
 
                 switch (matches[0].Value)
@@ -165,12 +191,30 @@ namespace Interpreter
                     case "stc":
                         result.Operations.Add(new SetCarryBitOperation(interpreter));
                         break;
+                    case "jmp":
+                        result.Operations.Add(new JumpOperation(matches[1].Value, interpreter));
+                        break;
                     case "hlt":
                         result.Operations.Add(new HaltOperation(interpreter));
                         break;
                 }
                 result.Length += info.Commands[matches[0].Value].Arguments.Count + 1;
                 //TODO: Add recording of operation byte code
+                lineId++;
+            }
+            foreach (var jump in referredJumps)
+            {
+                if (!result.JumpDestinations.ContainsKey(jump.Value))
+                {
+                    result.Errors.Add(jump.Key, $"Invalid jump destination. No label \"{jump.Value}\" is present in the code");
+                }
+            }
+            foreach (var addresses in referredAddresses)
+            {
+                if (addresses.Value - 0x800 < result.Length)
+                {
+                    result.Errors.Add(addresses.Key, $"Illegal write address.  0x800 to {(result.Length + 0x800).ToString("X4")} is reserved memory");
+                }
             }
             result.Success = result.Errors.Count == 0;
             return result;

@@ -16,15 +16,12 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
                 <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
-                    ;this is a test
-                    mvi a,90
-                    mov b,a
-                    sta 800
-                    mvi a,69
-                    sta 801
-                    lda 800
-                    sta 802
-                    hlt
+mvi b,10
+uwu:
+ add b
+ sta 810
+ jmp uwu
+hlt
                 </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
