@@ -194,6 +194,30 @@ namespace Interpreter
                     case "jmp":
                         result.Operations.Add(new JumpOperation(matches[1].Value, interpreter));
                         break;
+                    case "jnz":
+                        result.Operations.Add(new JumpIfNotZeroOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jz":
+                        result.Operations.Add(new JumpIfZeroOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jnc":
+                        result.Operations.Add(new JumpIfNotCarryOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jc":
+                        result.Operations.Add(new JumpIfCarryOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jpo":
+                        result.Operations.Add(new JumpIfParityOddOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jpe":
+                        result.Operations.Add(new JumpIfParityEvenOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jm":
+                        result.Operations.Add(new JumpIfNegativeOperation(matches[1].Value, interpreter));
+                        break;
+                    case "jp":
+                        result.Operations.Add(new JumpIfPositiveOperation(matches[1].Value, interpreter));
+                        break;
                     case "hlt":
                         result.Operations.Add(new HaltOperation(interpreter));
                         break;

@@ -2,8 +2,14 @@
     "JumpCommands": [
         "jmp",
         "call",
-        "jn",
-        "jp"
+        "jm",
+        "je",
+        "jc",
+        "jz",
+        "jp",
+        "jpo",
+        "jnc",
+        "jnz"
     ],
     "StaticAddressCommands": [
         "sta"
@@ -42,6 +48,46 @@
             ]
         },
         "jmp": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jm": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jpe": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jc": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jz": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jp": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jpo": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jnc": {
+            "Arguments": [
+                4
+            ]
+        },
+        "jnz": {
             "Arguments": [
                 4
             ]
