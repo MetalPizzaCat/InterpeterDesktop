@@ -134,6 +134,8 @@ namespace Interpreter
         {
             _registers = new Registers();
             _flags = new ProcessorFlags();
+            //TODO: uncomment to get access to full 64kb
+            //_memory = new Memory(0, ushort.MaxValue, 0);
             _memory = new Memory();
             _timer = new Timer(300.0);
             _timer.Enabled = false;

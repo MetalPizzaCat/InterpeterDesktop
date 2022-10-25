@@ -25,6 +25,19 @@ namespace Interpreter
     public class Memory : IProcessorComponent
     {
         /// <summary>
+        /// Where does addressing for the processor start
+        /// </summary>
+        private int _startAddress = 0x000;
+        /// <summary>
+        /// Where does addressing for the processor end
+        /// </summary>
+        private int _endAddress = 0xbb0;
+        /// <summary>
+        /// Where does the actual usable space begin<para/>
+        /// Could be used to split memory in chunks
+        /// </summary>
+        private int _addressOffset = 0x800;
+        /// <summary>
         /// Data grid friendly version of the memory data representation
         /// </summary>
         /// <returns></returns>
@@ -40,16 +53,18 @@ namespace Interpreter
         /// </summary>
         private int _protectedMemoryLength = 0;
 
+        public int AddressOffset => _addressOffset;
+
         public int ProtectedMemoryLength
         {
             get => _protectedMemoryLength;
             set => _protectedMemoryLength = value;
         }
-        
+
         public ObservableCollection<MemoryGridRow> MemoryDisplayGrid { get => _memoryDisplayGrid; /*set => _memoryDisplayGrid = value;*/ }
         public void OnMemoryValueChanged(int address, byte value)
         {
-            _memory[address - 0x800] = value;
+            _memory[address - _addressOffset] = value;
         }
 
 
@@ -77,7 +92,7 @@ namespace Interpreter
             {
                 if (i <= _protectedMemoryLength)
                 {
-                    throw new ProtectedMemoryWriteException($"Attempted to write at {(i + 0x800).ToString("X4")}. But 0x800 to {(_protectedMemoryLength + 0x800).ToString("X4")} is reserved memory");
+                    throw new ProtectedMemoryWriteException($"Attempted to write at {(i + _addressOffset).ToString("X4")}. But 0x800 to {(_protectedMemoryLength + _addressOffset).ToString("X4")} is reserved memory");
                 }
                 int ind = i - (i / 16) * 16;
                 _memoryDisplayGrid[i / 16][i - (i / 16) * 16] = value;
@@ -85,15 +100,30 @@ namespace Interpreter
             }
         }
 
-        public Memory()
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="startingAddress">At what address the memory starts at</param>
+        /// <param name="endAddress">At what address the memory ends</param>
+        /// <param name="offset">What offset does the memory has. Must be less or equal to startingAddress, used for array index correction</param>
+        public Memory(int startingAddress = 0x800, int endAddress = 0xbb0, int offset = 0x800)
         {
+            _startAddress = startingAddress;
+            _endAddress = endAddress;
+            if (_endAddress <= _startAddress)
+            {
+                throw new Exception("Invalid memory size provided for the processor");
+            }
+            _memory = new byte[endAddress - startingAddress + 1];
+
+            _addressOffset = offset;
             _memoryDisplayGrid.CollectionChanged += _onCollectionChanged;
-            for (int i = 0x800; i < 0xbb0; i += 0x10)
+            for (int i = _startAddress; i < _endAddress; i += 0x10)
             {
                 MemoryGridRow row = new MemoryGridRow(i);
                 for (int j = 0; j <= 0xf; j++)
                 {
-                    row[j] = _memory[((i + j) - 0x800)];
+                    row[j] = _memory[((i + j) - _addressOffset)];
                 }
                 row.OnRowValueChanged += OnMemoryValueChanged;
                 _memoryDisplayGrid.Add(row);
