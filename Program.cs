@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace InterpeterDesktop
+namespace InterpreterDesktop
 {
     class Program
     {
