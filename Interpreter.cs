@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Interpreter
 {
@@ -48,6 +49,11 @@ namespace Interpreter
         private List<OperationBase> _operations = new List<OperationBase>();
 
         public List<OperationBase> Operations { get => _operations; set => _operations = value; }
+
+        /// <summary>
+        /// List of all available jump destinations
+        /// </summary>
+        public Dictionary<string, int> _jumpDestinations = new Dictionary<string, int>();
 
         /// <summary>
         /// Helper function that returns value stored in the register<para/>
@@ -117,6 +123,13 @@ namespace Interpreter
             }
         }
 
+        public void SetCode(ProcessedCodeInfo code)
+        {
+            _jumpDestinations = code.JumpDestinations;
+            _memory.ProtectedMemoryLength = code.Length;
+            _operations = code.Operations;
+        }
+
         public Interpreter()
         {
             _registers = new Registers();
@@ -178,9 +191,9 @@ namespace Interpreter
 
         public void ResetProcessor()
         {
-           _registers.Reset();
-           _memory.Reset();
-           _flags.Reset();
+            _registers.Reset();
+            _memory.Reset();
+            _flags.Reset();
         }
 
         public void Run()

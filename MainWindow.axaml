@@ -15,7 +15,7 @@
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
-                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True">
+                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
                     ;this is a test
                     mvi a,90
                     mov b,a
@@ -27,7 +27,7 @@
                     hlt
                 </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
-                <StackPanel Name="ErrorMsgBox"></StackPanel>
+                <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
             </StackPanel>
             <DockPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">

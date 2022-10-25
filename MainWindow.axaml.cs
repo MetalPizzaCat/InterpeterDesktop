@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
-
+using System.Collections.Generic;
 
 namespace InterpreterDesktop
 {
@@ -12,6 +12,9 @@ namespace InterpreterDesktop
 
         private Interpreter.Interpreter _interpreter;
 
+        private ObservableCollection<string> _errors = new ObservableCollection<string>();
+
+        public ObservableCollection<string> Errors => _errors;
         public Interpreter.ProcessorFlags Flags => _interpreter.Flags;
         public Interpreter.Registers Registers => _interpreter.Registers;
         public MainWindow()
@@ -23,13 +26,27 @@ namespace InterpreterDesktop
             //MemoryGrid.DataContext = _interpreter.Memory.MemoryDisplayGrid;
         }
 
+        private void _displayErrors(Dictionary<int, string> errors)
+        {
+            _errors.Clear();
+            foreach (KeyValuePair<int, string> error in errors)
+            {
+                _errors.Add($"Line: {error.Key}. Error: {error.Value}");
+            }
+        }
+
         private void _runButtonPressed(object? sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
-                _interpreter.Operations = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
-                _interpreter.ResetProcessor();
-                _interpreter.Run();
+                Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
+                _displayErrors(code.Errors);
+                if (code.Success)
+                {
+                    _interpreter.SetCode(code);
+                    _interpreter.ResetProcessor();
+                    _interpreter.Run();
+                }
             }
         }
 
@@ -37,7 +54,9 @@ namespace InterpreterDesktop
         {
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
-                _interpreter.Operations = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
+                Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
+                _displayErrors(code.Errors);
+                _interpreter.SetCode(code);
             }
         }
 

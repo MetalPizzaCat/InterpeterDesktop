@@ -9,6 +9,16 @@ using System.ComponentModel;
 
 namespace Interpreter
 {
+    [System.Serializable]
+    public class ProtectedMemoryWriteException : System.Exception
+    {
+        public ProtectedMemoryWriteException() { }
+        public ProtectedMemoryWriteException(string message) : base(message) { }
+        public ProtectedMemoryWriteException(string message, System.Exception inner) : base(message, inner) { }
+        protected ProtectedMemoryWriteException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
     /// <summary>
     /// Stores memory information and provides interface for 
     /// </summary>
@@ -23,6 +33,19 @@ namespace Interpreter
         /// Memory data
         /// </summary>
         private byte[] _memory = new byte[944];
+
+        /// <summary>
+        /// Memory that program reserves for itself when it's assembled<para/>
+        /// This memory can not be written to and can only be used for execution
+        /// </summary>
+        private int _protectedMemoryLength = 0;
+
+        public int ProtectedMemoryLength
+        {
+            get => _protectedMemoryLength;
+            set => _protectedMemoryLength = value;
+        }
+        
         public ObservableCollection<MemoryGridRow> MemoryDisplayGrid { get => _memoryDisplayGrid; /*set => _memoryDisplayGrid = value;*/ }
         public void OnMemoryValueChanged(int address, byte value)
         {
@@ -52,6 +75,10 @@ namespace Interpreter
             get => _memory[i];
             set
             {
+                if (i <= _protectedMemoryLength)
+                {
+                    throw new ProtectedMemoryWriteException($"Attempted to write at {(i + 0x800).ToString("X4")}. But 0x800 to {(_protectedMemoryLength + 0x800).ToString("X4")} is reserved memory");
+                }
                 int ind = i - (i / 16) * 16;
                 _memoryDisplayGrid[i / 16][i - (i / 16) * 16] = value;
                 _memory[i] = value;
