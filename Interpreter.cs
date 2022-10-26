@@ -153,7 +153,7 @@ namespace Interpreter
         /// </summary>
         /// <param name="val"></param>
         /// <returns></returns>
-        private bool _parity(ushort val)
+        public bool Parity(ushort val)
         {
             int count = 0;
             for (int i = 0; i < 8; i++)
@@ -174,8 +174,23 @@ namespace Interpreter
             _flags.S = 0x80 == (clean & 0x80);//just check if the sign bit is true
             _flags.Z = clean == 0;
             _flags.Ac = clean > 0x09;
-            _flags.P = _parity(clean);
+            _flags.P = Parity(clean);
             _flags.C = value > 0xff;
+        }
+
+        /// <summary>
+        /// Set group of flags, intended for cmp operation
+        /// </summary>
+        /// <param name="z"></param>
+        /// <param name="s"></param>
+        /// <param name="p"></param>
+        /// <param name="cy"></param>
+        public void SetFlags(bool z, bool s, bool p, bool c)
+        {
+            _flags.Z = z;
+            _flags.S = s;
+            _flags.P = p;
+            _flags.C = c;
         }
 
         public void Step()

@@ -47,6 +47,26 @@
                 0
             ]
         },
+        "adi": {
+            "Arguments": [
+                1
+            ]
+        },
+        "aci": {
+            "Arguments": [
+                1
+            ]
+        },
+        "cpi": {
+            "Arguments": [
+                1
+            ]
+        },
+        "cpm": {
+            "Arguments": [
+                0
+            ]
+        },
         "jmp": {
             "Arguments": [
                 4

@@ -152,6 +152,44 @@ namespace Interpreter
     /// <summary>
     /// Adds register to accumulator, discarding carry
     /// </summary>
+    public class AddAccumulatorConstOperation : OperationBase
+    {
+        public readonly byte Value;
+        public AddAccumulatorConstOperation(byte value, Interpreter interpreter) : base("adi", interpreter)
+        {
+            Value = value;
+        }
+
+        public override void Execute()
+        {
+            int result = ((Interpreter.GetRegisterValue("A") + Value));
+            Interpreter.CheckFlags((ushort)result);
+            Interpreter.SetRegisterValue("A", (byte)(result & 0xFF));
+        }
+    }
+
+    /// <summary>
+    /// Adds register to accumulator, discarding carry
+    /// </summary>
+    public class AddAccumulatorConstCarryOperation : OperationBase
+    {
+        public readonly byte Value;
+        public AddAccumulatorConstCarryOperation(byte value, Interpreter interpreter) : base("aci", interpreter)
+        {
+            Value = value;
+        }
+
+        public override void Execute()
+        {
+            int result = ((Interpreter.GetRegisterValue("A") + Value)) + (Interpreter.Flags.C ? 1 : 0);
+            Interpreter.CheckFlags((ushort)result);
+            Interpreter.SetRegisterValue("A", (byte)(result & 0xFF));
+        }
+    }
+
+    /// <summary>
+    /// Adds register to accumulator, discarding carry
+    /// </summary>
     public class AddAccumulatorCarryOperation : OperationBase
     {
         public readonly string Source;
@@ -165,6 +203,42 @@ namespace Interpreter
             int value = ((Interpreter.GetRegisterValue("A") + Interpreter.GetRegisterValue(Source))) + (Interpreter.Flags.C ? 1 : 0);
             Interpreter.CheckFlags((ushort)value);
             Interpreter.SetRegisterValue("A", (byte)(value & 0xFF));
+        }
+    }
+
+    public class CompareOperation : OperationBase
+    {
+        public string Source;
+        public CompareOperation(string name, Interpreter interpreter) : base("cmp", interpreter)
+        {
+            Source = name;
+        }
+
+        public override void Execute()
+        {
+            int result = Interpreter.Registers.A - Interpreter.GetRegisterValue(Source);
+            Interpreter.Flags.Z = result == 0;
+            Interpreter.Flags.S = 0x80 == (result & 0x80);
+            Interpreter.Flags.P = Interpreter.Parity((ushort)result);
+            Interpreter.Flags.C = Interpreter.Registers.A < Interpreter.GetRegisterValue(Source);
+        }
+    }
+
+    public class CompareConstOperation : OperationBase
+    {
+        public byte Value;
+        public CompareConstOperation(byte value, Interpreter interpreter) : base("cpi", interpreter)
+        {
+            Value = value;
+        }
+
+        public override void Execute()
+        {
+            int result = Interpreter.Registers.A - Value;
+            Interpreter.Flags.Z = result == 0;
+            Interpreter.Flags.S = 0x80 == (result & 0x80);
+            Interpreter.Flags.P = Interpreter.Parity((ushort)result);
+            Interpreter.Flags.C = Interpreter.Registers.A < Value;
         }
     }
 
@@ -208,7 +282,7 @@ namespace Interpreter
 
         protected override bool CanJump()
         {
-            return Interpreter.Flags.Z;
+            return !Interpreter.Flags.Z;
         }
     }
     public class JumpIfZeroOperation : JumpOperation
@@ -219,7 +293,7 @@ namespace Interpreter
 
         protected override bool CanJump()
         {
-            return !Interpreter.Flags.Z;
+            return Interpreter.Flags.Z;
         }
     }
 

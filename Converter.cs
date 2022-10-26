@@ -185,6 +185,18 @@ namespace Interpreter
                     case "add":
                         result.Operations.Add(new AddAccumulatorOperation(matches[1].Value, interpreter));
                         break;
+                    case "adi":
+                        result.Operations.Add(new AddAccumulatorConstOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
+                        break;
+                    case "cmp":
+                        result.Operations.Add(new CompareOperation(matches[1].Value, interpreter));
+                        break;
+                    case "cpi":
+                        result.Operations.Add(new CompareConstOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
+                        break;
+                    case "aci":
+                        result.Operations.Add(new AddAccumulatorConstCarryOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
+                        break;
                     case "adc":
                         result.Operations.Add(new AddAccumulatorCarryOperation(matches[1].Value, interpreter));
                         break;
