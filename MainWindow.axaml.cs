@@ -49,6 +49,16 @@ namespace InterpreterDesktop
                 }
             }
         }
+        private async void _onSettingsButtonPressed(object? sender, RoutedEventArgs e)
+        {
+            SettingsWindow settingsWindow = new SettingsWindow();
+            await settingsWindow.ShowDialog(this);
+        }
+
+        private void _onStopButtonPressed(object? sender, RoutedEventArgs e)
+        {
+            _interpreter.Stop();
+        }
 
         private void _assembleButtonPressed(object? sender, RoutedEventArgs e)
         {

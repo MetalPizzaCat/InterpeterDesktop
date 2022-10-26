@@ -206,6 +206,11 @@ namespace Interpreter
             _operationCounter++;
         }
 
+        public void Stop()
+        {
+             _timer.Enabled = false;
+        }
+
         private void _onTimerTimeout(object? source, ElapsedEventArgs e)
         {
             Step();

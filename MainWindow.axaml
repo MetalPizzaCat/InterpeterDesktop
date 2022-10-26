@@ -16,9 +16,13 @@
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
-            <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" Click="_runButtonPressed" />
-            <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
-            <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
+            <MenuItem Header="_Emulation">
+                <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" Click="_runButtonPressed" />
+                <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
+                <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
+                <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_assembleButtonPressed" />
+            </MenuItem>
+            <MenuItem Header="_Settings" Click="_onSettingsButtonPressed" />
             <MenuItem Header="_About" />
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
