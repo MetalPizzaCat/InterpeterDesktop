@@ -230,6 +230,12 @@ namespace Interpreter
                     case "jp":
                         result.Operations.Add(new JumpIfPositiveOperation(matches[1].Value, interpreter));
                         break;
+                    case "out":
+                        result.Operations.Add(new OutOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
+                        break;
+                    case "outd":
+                        result.Operations.Add(new OutExtendedOperation(matches[1].Value, interpreter));
+                        break;
                     case "hlt":
                         result.Operations.Add(new HaltOperation(interpreter));
                         break;

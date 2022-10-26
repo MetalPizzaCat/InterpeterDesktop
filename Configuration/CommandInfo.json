@@ -112,6 +112,16 @@
                 4
             ]
         },
+        "out": {
+            "Arguments": [
+                1
+            ]
+        },
+        "outd": {
+            "Arguments": [
+                0
+            ]
+        },
         "hlt": {},
         "stc": {}
     }

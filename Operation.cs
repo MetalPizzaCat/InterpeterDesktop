@@ -369,6 +369,36 @@ namespace Interpreter
         }
     }
 
+    public sealed class OutOperation : OperationBase
+    {
+        private byte _index = 0;
+        public OutOperation(byte index, Interpreter interpreter) : base("out", interpreter)
+        {
+            _index = index;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.SetOut((int)_index, Interpreter.Registers.A);
+        }
+    }
+    /// <summary>
+    /// Variation of the out that instead writes value of the given register at whichever port a points at
+    /// </summary>
+    public sealed class OutExtendedOperation : OperationBase
+    {
+        private string _name;
+        public OutExtendedOperation(string name, Interpreter interpreter) : base("outd", interpreter)
+        {
+            _name = name;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.SetOut((int)Interpreter.Registers.A, Interpreter.GetRegisterValue(_name));
+        }
+    }
+
     /// <summary>
     /// This operation stops execution of code
     /// </summary>

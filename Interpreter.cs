@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.ComponentModel;
-using System.Collections.Generic;
-
+using System.Collections.ObjectModel;
 namespace Interpreter
 {
     [System.Serializable]
@@ -21,6 +20,8 @@ namespace Interpreter
     public class Interpreter
     {
 
+        public delegate void OutPortValueChangedEventHandler(int port, byte value);
+        public event OutPortValueChangedEventHandler? OnOutPortValueChanged;
         private Timer _timer;
         /// <summary>
         /// Program counter value of the processor, tells which operation is executed<para/>
@@ -47,6 +48,10 @@ namespace Interpreter
         public Memory Memory { get => _memory; set => _memory = value; }
 
         private List<OperationBase> _operations = new List<OperationBase>();
+
+        private byte[] _outputPorts = new byte[16];
+
+        public byte[] OutputPorts => _outputPorts;
 
         public List<OperationBase> Operations { get => _operations; set => _operations = value; }
 
@@ -123,6 +128,7 @@ namespace Interpreter
             }
         }
 
+
         public void SetCode(ProcessedCodeInfo code)
         {
             _jumpDestinations = code.JumpDestinations;
@@ -140,6 +146,19 @@ namespace Interpreter
             _timer = new Timer(100.0);
             _timer.Enabled = false;
             _timer.Elapsed += _onTimerTimeout;
+        }
+
+        public void SetOut(int port, byte value)
+        {
+            //because ports are meant to be dynamic this technically does write to that port
+            //there is just
+            //no output for it
+            if (port >= _outputPorts.Length || port < 0)
+            {
+                return;
+            }
+            _outputPorts[port] = value;
+            OnOutPortValueChanged?.Invoke(port, value);
         }
 
         public void JumpTo(string destination)
@@ -208,7 +227,7 @@ namespace Interpreter
 
         public void Stop()
         {
-             _timer.Enabled = false;
+            _timer.Enabled = false;
         }
 
         private void _onTimerTimeout(object? source, ElapsedEventArgs e)

@@ -11,19 +11,54 @@ namespace InterpreterDesktop
     {
 
         private Interpreter.Interpreter _interpreter;
+        private bool _displayOutAsText = false;
 
         private ObservableCollection<string> _errors = new ObservableCollection<string>();
+        private ObservableCollection<string> _output = new ObservableCollection<string>();
+        public ObservableCollection<string> Output => _output;
 
         public ObservableCollection<string> Errors => _errors;
         public Interpreter.ProcessorFlags Flags => _interpreter.Flags;
         public Interpreter.Registers Registers => _interpreter.Registers;
+
+        public bool DisplayOutAsText
+        {
+            get => _displayOutAsText;
+            set
+            {
+                _displayOutAsText = value;
+
+                if (value)
+                {
+                    int port = 0;
+                    foreach (byte b in _interpreter.OutputPorts)
+                    {
+                        _output[port++] = System.Text.Encoding.ASCII.GetString(new[] { b });
+                    }
+                }
+                else
+                {
+                    int port = 0;
+                    foreach (byte b in _interpreter.OutputPorts)
+                    {
+                        _output[port++] = b.ToString("X2");
+                    }
+                }
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             _interpreter = new Interpreter.Interpreter();
             MemoryGrid.Items = _interpreter.Memory.MemoryDisplayGrid;
+            List<string> temp = new List<string>();
+            foreach (byte b in _interpreter.OutputPorts)
+            {
+                temp.Add(b.ToString("X2"));
+            }
+            _output = new ObservableCollection<string>(temp);
             this.DataContext = this;
-            //MemoryGrid.DataContext = _interpreter.Memory.MemoryDisplayGrid;
         }
 
         private void _displayErrors(Dictionary<int, string> errors)
