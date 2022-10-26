@@ -1,3 +1,5 @@
+#define ALLOW_WRITES_OUTSIDE_RAM
+
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System;
@@ -61,7 +63,7 @@ namespace Interpreter
         /// <param name="input">Collection of reg ex matches that should contain [OPNAME], [Arg1] ...[ArgN]</param>
         /// <param name="info">Processor commands info config that has information about commands</param>
         /// <returns>Null if no errors were found, or error message</returns>
-        private static string? _checkInputValidity(MatchCollection input, ProcessorCommandsInfo info)
+        private static string? _checkInputValidity(MatchCollection input, ProcessorCommandsInfo info, Interpreter interpreter)
         {
             if (info.Commands.ContainsKey(input[0].Value))
             {
@@ -92,9 +94,9 @@ namespace Interpreter
                                 return ($"Argument {i - 1} can only contain numbers");
                             }
                             ushort addr = Convert.ToUInt16(input[i].Value, 16);
-                            if (addr < 0x800 || addr > 0xbb0)
+                            if (addr >= interpreter.Memory.MemoryData.TotalSize)
                             {
-                                return ($"Argument {i - 1} is an address and must be in 800 to bb0 range");
+                                return $"Argument {i - 1} is an address that points outside of allowed memory";
                             }
                             break;
                         case CommandArgumentType.LabelName:
@@ -151,7 +153,7 @@ namespace Interpreter
                     lineId++;
                     continue;
                 }
-                string? error = _checkInputValidity(matches, info);
+                string? error = _checkInputValidity(matches, info, interpreter);
                 if (error != null)
                 {
                     result.Errors.Add(lineId, error);
@@ -256,10 +258,16 @@ namespace Interpreter
             }
             foreach (var addresses in referredAddresses)
             {
-                if (addresses.Value - 0x800 < result.Length)
+                if (addresses.Value <= interpreter.Memory.MemoryData.RomSize)
                 {
-                    result.Errors.Add(addresses.Key, $"Illegal write address.  0x800 to {(result.Length + 0x800).ToString("X4")} is reserved memory");
+                    result.Errors.Add(addresses.Key, $"Illegal write address.  0000 to {(interpreter.Memory.MemoryData.RomSize).ToString("X4")} is READ only memory");
                 }
+#if FORBID_WRITES_OUTSIDE_RAM
+                else if (addresses.Value < interpreter.Memory.MemoryData.RamStart || addresses.Value > interpreter.Memory.MemoryData.RamEnd)
+                {
+                    result.Errors.Add(addresses.Key, $"Illegal write address.  Only writes to RAM ({interpreter.Memory.MemoryData.RamStart} to {interpreter.Memory.MemoryData.RamEnd}");
+                }
+#endif
             }
             result.Success = result.Errors.Count == 0;
             return result;

@@ -29,10 +29,6 @@ namespace Interpreter
         /// </summary>
         private int _programCounter = 0;
         /// <summary>
-        /// Stack pointer of the processor
-        /// </summary>
-        private int _stackPointer = 0;
-        /// <summary>
         /// Id of currently executed operation
         /// </summary>
         private int _operationCounter = 0;
@@ -85,6 +81,12 @@ namespace Interpreter
                     return _registers.H;
                 case "l":
                     return _registers.L;
+                // M register is a special case, as it is not in fact a register, but rather a memory cell at HL 
+                case "m":
+                    {
+                        ushort address = (ushort)(((int)Registers.H << 8) | (int)Registers.L);
+                        return Memory[address];
+                    }
                 default:
                     throw new InterpreterInvalidRegisterException($"Register {name} is not part of the processor");
             }
@@ -122,6 +124,13 @@ namespace Interpreter
                     break;
                 case "l":
                     _registers.L = value;
+                    break;
+                // M register is a special case, as it is not in fact a register, but rather a memory cell at HL 
+                case "m":
+                    {
+                        ushort address = (ushort)(((int)Registers.H << 8) | (int)Registers.L);
+                        Memory[address] = value;
+                    }
                     break;
                 default:
                     throw new InterpreterInvalidRegisterException($"Register {name} is not part of the processor");
