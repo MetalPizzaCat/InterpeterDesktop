@@ -415,4 +415,16 @@ namespace Interpreter
             //throw new System.NotImplementedException();
         }
     }
+
+    public class NoOperation : OperationBase
+    {
+        public NoOperation(Interpreter interpreter) : base("nop", interpreter)
+        {
+        }
+
+        public override void Execute()
+        {
+            //we do nothing cause no operation :)
+        }
+    }
 }

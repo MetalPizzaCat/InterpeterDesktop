@@ -51,6 +51,7 @@ namespace InterpreterDesktop
         {
             InitializeComponent();
             _interpreter = new Interpreter.Interpreter();
+            _interpreter.OnOutPortValueChanged += _onOutPortValueChanged;
             MemoryGrid.Items = _interpreter.Memory.MemoryDisplayGrid;
             List<string> temp = new List<string>();
             foreach (byte b in _interpreter.OutputPorts)
@@ -59,6 +60,11 @@ namespace InterpreterDesktop
             }
             _output = new ObservableCollection<string>(temp);
             this.DataContext = this;
+        }
+
+        private void _onOutPortValueChanged(int port, byte value)
+        {
+            _output[port] = _displayOutAsText ?  System.Text.Encoding.ASCII.GetString(new[] { value }) : value.ToString("X2");
         }
 
         private void _displayErrors(Dictionary<int, string> errors)
@@ -90,7 +96,7 @@ namespace InterpreterDesktop
             await settingsWindow.ShowDialog(this);
         }
 
-        private void _onStopButtonPressed(object? sender, RoutedEventArgs e)
+        private void _stopButtonPressed(object? sender, RoutedEventArgs e)
         {
             _interpreter.Stop();
         }
