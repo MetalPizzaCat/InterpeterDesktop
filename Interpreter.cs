@@ -364,6 +364,30 @@ namespace Interpreter
                     }
                     ProgramCounter += 3;
                     break;
+                case 0xc5://push b
+                    PushStack("b");
+                    ProgramCounter++;
+                    break;
+                case 0xd5://push d
+                    PushStack("d");
+                    ProgramCounter++;
+                    break;
+                case 0xe5://push h
+                    PushStack("h");
+                    ProgramCounter++;
+                    break;
+                case 0xc1://pop b
+                    PopStack("b");
+                    ProgramCounter++;
+                    break;
+                case 0xd1://pop d
+                    PopStack("d");
+                    ProgramCounter++;
+                    break;
+                case 0xe1://pop h
+                    PopStack("h");
+                    ProgramCounter++;
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");

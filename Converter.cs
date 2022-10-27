@@ -121,7 +121,6 @@ namespace Interpreter
             ProcessorCommandsInfo info = Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessorCommandsInfo>(infoText) ?? throw new NullReferenceException("Unable to process configuration");
 
             ProcessedCodeInfo result = new ProcessedCodeInfo();
-            List<OperationBase> operations = new List<OperationBase>();
             //jumps that were referred to by call/jump commands
             //used for checking if jump destination is valid at assemble time
             Dictionary<int, string> referredJumps = new Dictionary<int, string>();
