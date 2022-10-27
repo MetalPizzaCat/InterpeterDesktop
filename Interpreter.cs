@@ -1,3 +1,14 @@
+/**
+Dear reader BEWARE! 
+The idea behind this emulator is not greatest as instead of using actual opcodes during execution this program instead generates
+an execution list with it runs instead
+This approach is rather inefficient, but it was done due to how opcodes in intel 8080 are designed'
+To save up on memory it has an opcode for every variation of a command, instead of encoding that in an additional byte
+Because of this, executing directly from codes would imply having a case for every variation(yes it could be accounted for because of HOW
+they are placed in the op code table, but by the time i'm writing this message it would be rather inefficient to turn back(?))
+*/
+
+//TODO: Refactor how opcodes are handled cause using classes for every operation is clunky
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
