@@ -355,6 +355,34 @@ namespace Interpreter
         }
     }
 
+    public class PushOperation : OperationBase
+    {
+        private string _registerName;
+        public PushOperation(string name, Interpreter interpreter) : base("push", interpreter)
+        {
+            _registerName = name;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.PushStack(_registerName);
+        }
+    }
+
+    public class PopOperation : OperationBase
+    {
+        private string _registerName;
+        public PopOperation(string name, Interpreter interpreter) : base("pop", interpreter)
+        {
+            _registerName = name;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.PopStack(_registerName);
+        }
+    }
+
     /// <summary>
     /// This operation stops execution of code
     /// </summary>

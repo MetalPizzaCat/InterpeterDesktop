@@ -238,6 +238,12 @@ namespace Interpreter
                     case "outd":
                         result.Operations.Add(new OutExtendedOperation(matches[1].Value, interpreter));
                         break;
+                    case "push":
+                        result.Operations.Add(new PushOperation(matches[1].Value, interpreter));
+                        break;
+                    case "pop":
+                        result.Operations.Add(new PopOperation(matches[1].Value, interpreter));
+                        break;
                     case "nop":
                         result.Operations.Add(new NoOperation(interpreter));
                         break;

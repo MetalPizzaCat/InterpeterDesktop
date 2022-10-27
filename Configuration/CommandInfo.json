@@ -122,6 +122,16 @@
                 0
             ]
         },
+        "push": {
+            "Arguments": [
+                0
+            ]
+        },
+        "pop": {
+            "Arguments": [
+                0
+            ]
+        },
         "nop": {},
         "hlt": {},
         "stc": {}

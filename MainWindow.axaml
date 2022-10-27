@@ -28,12 +28,9 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
                 <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
-mvi b,10
-uwu:
- add b
- sta 810
- jmp uwu
-hlt
+mvi b,34
+mvi c,56
+push b
                 </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>

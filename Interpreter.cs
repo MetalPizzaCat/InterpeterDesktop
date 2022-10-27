@@ -145,6 +145,63 @@ namespace Interpreter
             _operations = code.Operations;
         }
 
+
+
+        /// <summary>
+        /// Pushes value stored in the pair of registers advancing the stack pointer
+        /// </summary>
+        /// <param name="pairName"></param>
+        public void PushStack(string pairName)
+        {
+            byte h = 0;
+            byte l = 0;
+            switch (pairName.ToLower())
+            {
+                case "b":
+                    h = Registers.B;
+                    l = Registers.C;
+                    break;
+                case "d":
+                    h = Registers.D;
+                    l = Registers.E;
+                    break;
+                case "h":
+                    h = Registers.H;
+                    l = Registers.L;
+                    break;
+            }
+            ushort sp = _memory.StackPointer;
+            _memory[sp] = h;
+            _memory[(ushort)(sp - 1)] = l;
+            sp -= 2;
+            _memory.StackPointer = sp;
+        }
+
+
+        public void PopStack(string destinationPairName)
+        {
+            ushort sp = _memory.StackPointer;
+            byte h = _memory[(ushort)(sp + 2)];
+            byte l = _memory[(ushort)(sp + 1)];
+            switch (destinationPairName)
+            {
+                case "b":
+                    Registers.B = h;
+                    Registers.C = l;
+                    break;
+                case "d":
+                    Registers.D = h;
+                    Registers.E = l;
+                    break;
+                case "h":
+                    Registers.H = h;
+                    Registers.L = l;
+                    break;
+            }
+            sp += 2;
+            _memory.StackPointer = sp;
+        }
+
         public Interpreter()
         {
             _registers = new Registers();

@@ -105,7 +105,24 @@ namespace Interpreter
         /// Returns value in the memory that was dedicated for stack pointer
         /// </summary>
         /// <returns></returns>
-        public ushort StackPointer => (ushort)(((int)_memory[_memoryData.StackPointerLocation] << 8) | (int)_memory[_memoryData.StackPointerLocation + 1]);
+        public ushort StackPointer
+        {
+            get => (ushort)(((int)_memory[_memoryData.StackPointerLocation + 1] << 8) | (int)_memory[_memoryData.StackPointerLocation]);
+            set
+            {
+                if (value < _memoryData.StackAddress - _memoryData.StackLength)
+                {
+                    throw new Exception("Emulator stack overflow");
+                }
+                this[(ushort)(_memoryData.StackPointerLocation + 1)] = (byte)(value >> 8);
+                this[(ushort)(_memoryData.StackPointerLocation)] = (byte)(value & 0xff);
+
+                byte h = this[(ushort)(_memoryData.StackPointerLocation + 1)];
+                byte l = this[(ushort)(_memoryData.StackPointerLocation)];
+
+                Console.WriteLine($"{h.ToString("X2")}{l.ToString("X2")} is {StackPointer.ToString("X4")}");
+            }
+        }
 
         public ObservableCollection<MemoryGridRow> MemoryDisplayGrid { get => _memoryDisplayGrid; }
         public void OnMemoryValueChanged(int address, byte value)
@@ -120,7 +137,7 @@ namespace Interpreter
 
         public void Reset()
         {
-            _memory = new byte[_memoryData.TotalSize];
+            _memory = new byte[_memoryData.TotalSize + 1];
             foreach (MemoryGridRow row in _memoryDisplayGrid)
             {
                 for (int i = 0; i < 0x10; i++)
@@ -128,6 +145,7 @@ namespace Interpreter
                     row[i] = 0;
                 }
             }
+            StackPointer = (ushort)_memoryData.StackAddress;
         }
 
         public byte this[ushort i]
@@ -160,8 +178,8 @@ namespace Interpreter
 
             _memoryData = new MemorySegmentationData(totalSize, ramStart, ramEnd, romSize, stackAddress, stackLength, offset, stackPointerLocation);
             _memoryDisplayGrid.CollectionChanged += _onCollectionChanged;
-            _memory = new byte[totalSize];
-            for (int i = 0; i < totalSize - 0x10; i += 0x10)
+            _memory = new byte[totalSize + 1];
+            for (int i = 0; i < totalSize; i += 0x10)
             {
                 MemoryGridRow row = new MemoryGridRow(i);
                 for (int j = 0; j <= 0xf; j++)
@@ -171,6 +189,7 @@ namespace Interpreter
                 row.OnRowValueChanged += OnMemoryValueChanged;
                 _memoryDisplayGrid.Add(row);
             }
+            StackPointer = (ushort)stackAddress;
         }
     }
 }
