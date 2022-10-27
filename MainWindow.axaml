@@ -28,9 +28,14 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
                 <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
+j:
 mvi b,34
 mvi c,56
-push b
+mov a,b
+mov h,c
+mov l,a
+jmp j
+hlt
                 </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
@@ -130,6 +135,7 @@ push b
                             <TextBlock Text="{Binding Output[15]}" />
                         </StackPanel>
                         <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
+                        <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
                 </DockPanel>
                 <!-- Using data grid to dispaly memory cells-->

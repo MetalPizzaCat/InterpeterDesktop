@@ -173,7 +173,7 @@ namespace Interpreter
                     case "mov":
                         {
                             byte byteBase = (byte)(0x40 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x8);
-                            byteBase += (byte)_registerNames.IndexOf(matches[1].Value.ToLower());
+                            byteBase += (byte)_registerNames.IndexOf(matches[2].Value.ToLower());
                             result.CommandBytes.Add(byteBase);
                         }
                         break;

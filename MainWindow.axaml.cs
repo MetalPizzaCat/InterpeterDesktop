@@ -11,6 +11,8 @@ namespace InterpreterDesktop
     {
 
         private Interpreter.Interpreter _interpreter;
+
+        public Interpreter.Interpreter InterpreterObject => _interpreter;
         private bool _displayOutAsText = false;
 
         private ObservableCollection<string> _errors = new ObservableCollection<string>();
