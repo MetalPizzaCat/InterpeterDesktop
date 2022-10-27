@@ -15,6 +15,11 @@ namespace Interpreter
         /// <value></value>
         public virtual byte[] ByteCode => new byte[1] { 0 };
 
+        /// <summary>
+        /// How many bytes does this program occupy
+        /// </summary>
+        public int Size => ByteCode.Length;
+
         protected OperationBase(string name, Interpreter interpreter)
         {
             Name = name;
@@ -29,10 +34,66 @@ namespace Interpreter
         public readonly string Destination;
         public readonly string Source;
 
+        private readonly byte[] _bytes = new byte[1];
+
+        public override byte[] ByteCode => _bytes;
+
         public RegisterMemoryMoveOperation(string destination, string source, Interpreter interpreter) : base("mov", interpreter)
         {
             Destination = destination;
             Source = source;
+            byte byteBase = 0;
+            switch (source)
+            {
+                case "a":
+                    byteBase = 0x78;
+                    break;
+                case "b":
+                    byteBase = 0x40;
+                    break;
+                case "c":
+                    byteBase = 0x48;
+                    break;
+                case "d":
+                    byteBase = 0x50;
+                    break;
+                case "e":
+                    byteBase = 0x58;
+                    break;
+                case "h":
+                    byteBase = 0x60;
+                    break;
+                case "l":
+                    byteBase = 0x68;
+                    break;
+            }
+            switch (destination)
+            {
+                case "a":
+                    byteBase += 0x7;
+                    break;
+                case "b":
+                    break;
+                case "c":
+                    byteBase += 0x1;
+                    break;
+                case "d":
+                    byteBase += 0x2;
+                    break;
+                case "e":
+                    byteBase += 0x3;
+                    break;
+                case "h":
+                    byteBase += 0x4;
+                    break;
+                case "l":
+                    byteBase += 0x5;
+                    break;
+                case "m":
+                    byteBase += 0x6;
+                    break;
+            }
+            _bytes[0] = byteBase;
         }
 
         public override void Execute()
@@ -46,10 +107,43 @@ namespace Interpreter
         public readonly string Destination;
         public readonly byte Source;
 
+        private readonly byte[] _bytes = new byte[1];
+
+        public override byte[] ByteCode => _bytes;
+
         public RegisterMemoryAssignOperation(string destination, byte source, Interpreter interpreter) : base("mvi", interpreter)
         {
             Destination = destination;
             Source = source;
+            byte byteBase = 0;
+            switch (destination)
+            {
+                case "a":
+                    byteBase = 0x3e;
+                    break;
+                case "b":
+                    byteBase = 0x06;
+                    break;
+                case "c":
+                    byteBase = 0x0e;
+                    break;
+                case "d":
+                    byteBase = 0x16;
+                    break;
+                case "e":
+                    byteBase = 0x1e;
+                    break;
+                case "h":
+                    byteBase = 0x26;
+                    break;
+                case "l":
+                    byteBase = 0x2e;
+                    break;
+                case "m":
+                    byteBase = 0x36;
+                    break;
+            }
+            _bytes[0] = byteBase;
         }
 
         public override void Execute()

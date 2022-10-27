@@ -20,7 +20,7 @@ namespace Interpreter
             System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
-    public struct ProcessedCodeInfo
+    public class ProcessedCodeInfo
     {
         /// <summary>
         /// All of the operations that were in the original code
@@ -274,6 +274,14 @@ namespace Interpreter
                     result.Errors.Add(addresses.Key, $"Illegal write address.  Only writes to RAM ({interpreter.Memory.MemoryData.RamStart} to {interpreter.Memory.MemoryData.RamEnd}");
                 }
 #endif
+            }
+            int offset = 0;
+            foreach (OperationBase op in result.Operations)
+            {
+                foreach (byte b in op.ByteCode)
+                {
+                    result.CommandBytes.Add(b);
+                }
             }
             result.Success = result.Errors.Count == 0;
             return result;

@@ -84,6 +84,10 @@ namespace Interpreter
         /// Memory data
         /// </summary>
         private byte[] _memory;
+        /// <summary>
+        /// Copy of the rom that will persist thought memory resets
+        /// </summary>
+        private byte[] _rom;
 
         /// <summary>
         /// Memory that program reserves for itself when it's assembled<para/>
@@ -101,6 +105,15 @@ namespace Interpreter
             set => _protectedMemoryLength = value;
         }
 
+        /// <summary>
+        /// Overrides rom space with new rom<para/>
+        /// </summary>
+        /// <param name="rom"></param>
+        public void WriteRom(byte[] rom)
+        {
+            _rom = new byte[rom.Length];
+            rom.CopyTo(_rom,0);
+        }
         /// <summary>
         /// Returns value in the memory that was dedicated for stack pointer
         /// </summary>
@@ -138,11 +151,14 @@ namespace Interpreter
         public void Reset()
         {
             _memory = new byte[_memoryData.TotalSize + 1];
+            _rom.CopyTo(_memory, 0);
+            int writeOffset = 0;
             foreach (MemoryGridRow row in _memoryDisplayGrid)
             {
                 for (int i = 0; i < 0x10; i++)
                 {
-                    row[i] = 0;
+                    row[i] = (writeOffset >= _rom.Length ? (byte)0 : _rom[writeOffset]);
+                    writeOffset++;
                 }
             }
             StackPointer = (ushort)_memoryData.StackAddress;

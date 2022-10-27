@@ -64,7 +64,7 @@ namespace InterpreterDesktop
 
         private void _onOutPortValueChanged(int port, byte value)
         {
-            _output[port] = _displayOutAsText ?  System.Text.Encoding.ASCII.GetString(new[] { value }) : value.ToString("X2");
+            _output[port] = _displayOutAsText ? System.Text.Encoding.ASCII.GetString(new[] { value }) : value.ToString("X2");
         }
 
         private void _displayErrors(Dictionary<int, string> errors)
@@ -85,7 +85,9 @@ namespace InterpreterDesktop
                 if (code.Success)
                 {
                     _interpreter.SetCode(code);
+                    _interpreter.Memory.WriteRom(code.CommandBytes.ToArray());
                     _interpreter.ResetProcessor();
+
                     _interpreter.Run();
                 }
             }
