@@ -1,55 +1,24 @@
 namespace Interpreter
 {
-    public class Operation
-    {
-        /// <summary>
-        /// Name of the operation
-        /// </summary>
-        public string Name;
-        /// <summary>
-        /// Right hand register that will be used as argument
-        /// </summary>
-        public string? RightRegisterName;
-        /// <summary>
-        /// Left hand register that will be used as argument
-        /// </summary>
-        public string? LeftRegisterName;
-        /// <summary>
-        /// Right hand byte value that will be used as argument
-        /// </summary>
-        public byte? RightArgument;
-        /// <summary>
-        /// Left hand byte value that will be used as argument
-        /// </summary>
-        public byte? LeftArgument;
-
-        public Operation(string name, string? rightRegisterName, string? leftRegisterName)
-        {
-            Name = name;
-            RightRegisterName = rightRegisterName;
-            LeftRegisterName = leftRegisterName;
-            RightArgument = null;
-            LeftArgument = null;
-        }
-
-        public Operation(string name, byte? rightArgument, byte? leftArgument)
-        {
-            Name = name;
-            RightRegisterName = null;
-            LeftRegisterName = null;
-            RightArgument = rightArgument;
-            LeftArgument = leftArgument;
-        }
-    }
 
     public abstract class OperationBase
     {
         /// <summary>
-        /// Name of the operation in the assembly
+        /// Name of the operation in the assembly, must match name in the configuration
         /// </summary>
         public string Name;
 
         protected Interpreter Interpreter;
+        /// <summary>
+        /// Byte code that this operation will produce when written to rom
+        /// </summary>
+        /// <value></value>
+        public virtual byte[] ByteCode => new byte[1] { 0 };
+
+        /// <summary>
+        /// How many bytes does this program occupy
+        /// </summary>
+        public int Size => ByteCode.Length;
 
         protected OperationBase(string name, Interpreter interpreter)
         {
@@ -65,10 +34,66 @@ namespace Interpreter
         public readonly string Destination;
         public readonly string Source;
 
+        private readonly byte[] _bytes = new byte[1];
+
+        public override byte[] ByteCode => _bytes;
+
         public RegisterMemoryMoveOperation(string destination, string source, Interpreter interpreter) : base("mov", interpreter)
         {
             Destination = destination;
             Source = source;
+            byte byteBase = 0;
+            switch (source)
+            {
+                case "a":
+                    byteBase = 0x78;
+                    break;
+                case "b":
+                    byteBase = 0x40;
+                    break;
+                case "c":
+                    byteBase = 0x48;
+                    break;
+                case "d":
+                    byteBase = 0x50;
+                    break;
+                case "e":
+                    byteBase = 0x58;
+                    break;
+                case "h":
+                    byteBase = 0x60;
+                    break;
+                case "l":
+                    byteBase = 0x68;
+                    break;
+            }
+            switch (destination)
+            {
+                case "a":
+                    byteBase += 0x7;
+                    break;
+                case "b":
+                    break;
+                case "c":
+                    byteBase += 0x1;
+                    break;
+                case "d":
+                    byteBase += 0x2;
+                    break;
+                case "e":
+                    byteBase += 0x3;
+                    break;
+                case "h":
+                    byteBase += 0x4;
+                    break;
+                case "l":
+                    byteBase += 0x5;
+                    break;
+                case "m":
+                    byteBase += 0x6;
+                    break;
+            }
+            _bytes[0] = byteBase;
         }
 
         public override void Execute()
@@ -82,10 +107,43 @@ namespace Interpreter
         public readonly string Destination;
         public readonly byte Source;
 
+        private readonly byte[] _bytes = new byte[1];
+
+        public override byte[] ByteCode => _bytes;
+
         public RegisterMemoryAssignOperation(string destination, byte source, Interpreter interpreter) : base("mvi", interpreter)
         {
             Destination = destination;
             Source = source;
+            byte byteBase = 0;
+            switch (destination)
+            {
+                case "a":
+                    byteBase = 0x3e;
+                    break;
+                case "b":
+                    byteBase = 0x06;
+                    break;
+                case "c":
+                    byteBase = 0x0e;
+                    break;
+                case "d":
+                    byteBase = 0x16;
+                    break;
+                case "e":
+                    byteBase = 0x1e;
+                    break;
+                case "h":
+                    byteBase = 0x26;
+                    break;
+                case "l":
+                    byteBase = 0x2e;
+                    break;
+                case "m":
+                    byteBase = 0x36;
+                    break;
+            }
+            _bytes[0] = byteBase;
         }
 
         public override void Execute()
@@ -100,15 +158,11 @@ namespace Interpreter
         public StoreAccumulatorOperation(ushort destination, Interpreter interpreter) : base("sta", interpreter)
         {
             Destination = destination;
-            if (Destination < 0x800 || Destination > 0xbb0)
-            {
-                throw new System.Exception("Address must be in 800 to bb0 range");
-            }
         }
 
         public override void Execute()
         {
-            Interpreter.Memory[(ushort)(Destination - 0x800)] = Interpreter.GetRegisterValue("A");
+            Interpreter.Memory[Destination] = Interpreter.GetRegisterValue("A");
         }
     }
 
@@ -118,15 +172,11 @@ namespace Interpreter
         public LoadAccumulatorOperation(ushort source, Interpreter interpreter) : base("lda", interpreter)
         {
             Source = source;
-            if (Source < 0x800 || Source > 0xbb0)
-            {
-                throw new System.Exception("Address must be in 800 to bb0 range");
-            }
         }
 
         public override void Execute()
         {
-            Interpreter.SetRegisterValue("A", Interpreter.Memory[(ushort)(Source - 0x800)]);
+            Interpreter.SetRegisterValue("A", Interpreter.Memory[Source]);
         }
     }
 
@@ -396,6 +446,34 @@ namespace Interpreter
         public override void Execute()
         {
             Interpreter.SetOut((int)Interpreter.Registers.A, Interpreter.GetRegisterValue(_name));
+        }
+    }
+
+    public class PushOperation : OperationBase
+    {
+        private string _registerName;
+        public PushOperation(string name, Interpreter interpreter) : base("push", interpreter)
+        {
+            _registerName = name;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.PushStack(_registerName);
+        }
+    }
+
+    public class PopOperation : OperationBase
+    {
+        private string _registerName;
+        public PopOperation(string name, Interpreter interpreter) : base("pop", interpreter)
+        {
+            _registerName = name;
+        }
+
+        public override void Execute()
+        {
+            Interpreter.PopStack(_registerName);
         }
     }
 

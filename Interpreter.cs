@@ -1,3 +1,14 @@
+/**
+Dear reader BEWARE! 
+The idea behind this emulator is not greatest as instead of using actual opcodes during execution this program instead generates
+an execution list with it runs instead
+This approach is rather inefficient, but it was done due to how opcodes in intel 8080 are designed'
+To save up on memory it has an opcode for every variation of a command, instead of encoding that in an additional byte
+Because of this, executing directly from codes would imply having a case for every variation(yes it could be accounted for because of HOW
+they are placed in the op code table, but by the time i'm writing this message it would be rather inefficient to turn back(?))
+*/
+
+//TODO: Refactor how opcodes are handled cause using classes for every operation is clunky
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -28,10 +39,6 @@ namespace Interpreter
         /// Only exists as a representation since _operationCounter is the actual value used for picking operations 
         /// </summary>
         private int _programCounter = 0;
-        /// <summary>
-        /// Stack pointer of the processor
-        /// </summary>
-        private int _stackPointer = 0;
         /// <summary>
         /// Id of currently executed operation
         /// </summary>
@@ -85,6 +92,12 @@ namespace Interpreter
                     return _registers.H;
                 case "l":
                     return _registers.L;
+                // M register is a special case, as it is not in fact a register, but rather a memory cell at HL 
+                case "m":
+                    {
+                        ushort address = (ushort)(((int)Registers.H << 8) | (int)Registers.L);
+                        return Memory[address];
+                    }
                 default:
                     throw new InterpreterInvalidRegisterException($"Register {name} is not part of the processor");
             }
@@ -123,6 +136,13 @@ namespace Interpreter
                 case "l":
                     _registers.L = value;
                     break;
+                // M register is a special case, as it is not in fact a register, but rather a memory cell at HL 
+                case "m":
+                    {
+                        ushort address = (ushort)(((int)Registers.H << 8) | (int)Registers.L);
+                        Memory[address] = value;
+                    }
+                    break;
                 default:
                     throw new InterpreterInvalidRegisterException($"Register {name} is not part of the processor");
             }
@@ -134,6 +154,63 @@ namespace Interpreter
             _jumpDestinations = code.JumpDestinations;
             _memory.ProtectedMemoryLength = code.Length;
             _operations = code.Operations;
+        }
+
+
+
+        /// <summary>
+        /// Pushes value stored in the pair of registers advancing the stack pointer
+        /// </summary>
+        /// <param name="pairName"></param>
+        public void PushStack(string pairName)
+        {
+            byte h = 0;
+            byte l = 0;
+            switch (pairName.ToLower())
+            {
+                case "b":
+                    h = Registers.B;
+                    l = Registers.C;
+                    break;
+                case "d":
+                    h = Registers.D;
+                    l = Registers.E;
+                    break;
+                case "h":
+                    h = Registers.H;
+                    l = Registers.L;
+                    break;
+            }
+            ushort sp = _memory.StackPointer;
+            _memory[sp] = h;
+            _memory[(ushort)(sp - 1)] = l;
+            sp -= 2;
+            _memory.StackPointer = sp;
+        }
+
+
+        public void PopStack(string destinationPairName)
+        {
+            ushort sp = _memory.StackPointer;
+            byte h = _memory[(ushort)(sp + 2)];
+            byte l = _memory[(ushort)(sp + 1)];
+            switch (destinationPairName)
+            {
+                case "b":
+                    Registers.B = h;
+                    Registers.C = l;
+                    break;
+                case "d":
+                    Registers.D = h;
+                    Registers.E = l;
+                    break;
+                case "h":
+                    Registers.H = h;
+                    Registers.L = l;
+                    break;
+            }
+            sp += 2;
+            _memory.StackPointer = sp;
         }
 
         public Interpreter()

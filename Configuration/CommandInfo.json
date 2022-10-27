@@ -62,7 +62,7 @@
                 1
             ]
         },
-        "cpm": {
+        "cmp": {
             "Arguments": [
                 0
             ]
@@ -118,6 +118,16 @@
             ]
         },
         "outd": {
+            "Arguments": [
+                0
+            ]
+        },
+        "push": {
+            "Arguments": [
+                0
+            ]
+        },
+        "pop": {
             "Arguments": [
                 0
             ]
