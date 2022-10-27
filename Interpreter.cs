@@ -153,10 +153,8 @@ namespace Interpreter
         {
             _jumpDestinations = code.JumpDestinations;
             _memory.ProtectedMemoryLength = code.Length;
-            _operations = code.Operations;
+            _memory.WriteRom(code.CommandBytes.ToArray());
         }
-
-
 
         /// <summary>
         /// Pushes value stored in the pair of registers advancing the stack pointer
