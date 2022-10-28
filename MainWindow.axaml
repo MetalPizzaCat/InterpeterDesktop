@@ -6,7 +6,7 @@
     d:DesignWidth="400"
     d:DesignHeight="450"
     x:Class="InterpreterDesktop.MainWindow"
-    Title="Wee(Wonderfully Emulating Emulator)">
+    Title="NEMA-8">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
