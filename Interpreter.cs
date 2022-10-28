@@ -28,21 +28,19 @@ namespace Interpreter
             System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
-    public class Interpreter
+    public class Interpreter : INotifyPropertyChanged
     {
-
+        private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public delegate void OutPortValueChangedEventHandler(int port, byte value);
         public event OutPortValueChangedEventHandler? OnOutPortValueChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         private Timer _timer;
         /// <summary>
         /// Program counter value of the processor, tells which operation is executed<para/>
         /// Only exists as a representation since _operationCounter is the actual value used for picking operations 
         /// </summary>
         private int _programCounter = 0;
-        /// <summary>
-        /// Id of currently executed operation
-        /// </summary>
-        private int _operationCounter = 0;
 
         private Registers _registers;
         private ProcessorFlags _flags;
@@ -54,13 +52,9 @@ namespace Interpreter
 
         public Memory Memory { get => _memory; set => _memory = value; }
 
-        private List<OperationBase> _operations = new List<OperationBase>();
-
         private byte[] _outputPorts = new byte[16];
 
         public byte[] OutputPorts => _outputPorts;
-
-        public List<OperationBase> Operations { get => _operations; set => _operations = value; }
 
         /// <summary>
         /// List of all available jump destinations
@@ -153,10 +147,8 @@ namespace Interpreter
         {
             _jumpDestinations = code.JumpDestinations;
             _memory.ProtectedMemoryLength = code.Length;
-            _operations = code.Operations;
+            _memory.WriteRom(code.CommandBytes.ToArray());
         }
-
-
 
         /// <summary>
         /// Pushes value stored in the pair of registers advancing the stack pointer
@@ -220,7 +212,7 @@ namespace Interpreter
             //TODO: uncomment to get access to full 64kb
             //_memory = new Memory(0, ushort.MaxValue, 0);
             _memory = new Memory();
-            _timer = new Timer(10);
+            _timer = new Timer(300);
             _timer.Enabled = false;
             _timer.Elapsed += _onTimerTimeout;
         }
@@ -240,7 +232,17 @@ namespace Interpreter
 
         public void JumpTo(string destination)
         {
-            _operationCounter = _jumpDestinations[destination];
+            ProgramCounter = _jumpDestinations[destination];
+        }
+
+        public int ProgramCounter
+        {
+            get => _programCounter;
+            set
+            {
+                _programCounter = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ProgramCounter"));
+            }
         }
 
         /// <summary>
@@ -289,17 +291,118 @@ namespace Interpreter
             _flags.C = c;
         }
 
+        private bool _mov(byte op)
+        {
+            int movCheck = op & 0xF0;
+            int movSubCheck = op & 0x0F;
+            switch (movCheck)
+            {
+                case 0x40:
+                    SetRegisterValue(movSubCheck > 0x7 ? "c" : "b", GetRegisterValue(_registerNames[movSubCheck > 0x7 ? movSubCheck - 0x8 : movSubCheck]));
+                    break;
+                case 0x50:
+                    SetRegisterValue(movSubCheck > 0x7 ? "e" : "d", GetRegisterValue(_registerNames[movSubCheck > 0x7 ? movSubCheck - 0x8 : movSubCheck]));
+                    break;
+                case 0x60:
+                    SetRegisterValue(movSubCheck > 0x7 ? "l" : "h", GetRegisterValue(_registerNames[movSubCheck > 0x7 ? movSubCheck - 0x8 : movSubCheck]));
+                    break;
+                case 0x70:
+                    SetRegisterValue(movSubCheck > 0x7 ? "a" : "m", GetRegisterValue(_registerNames[movSubCheck > 0x7 ? movSubCheck - 0x8 : movSubCheck]));
+                    break;
+                default:
+                    return false;
+            }
+            ProgramCounter++;
+            return true;
+        }
+
         public void Step()
         {
-            if (_operationCounter >= _operations.Count)
+            byte op = _memory[(ushort)ProgramCounter];
+
+
+            switch (op)
+            {
+                case 0:
+                    break;
+                case 0x06://mvi b
+                    Registers.B = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0x0E://mvi c
+                    Registers.C = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0x16://mvi d
+                    Registers.D = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0x1e: //mvi e
+                    Registers.E = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0x26: //mvi h
+                    Registers.H = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0x2e: //mvi e
+                    Registers.L = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0x36: //mvi m
+                    SetRegisterValue("M", _memory[(ushort)(ProgramCounter + 1)]);
+                    ProgramCounter += 2;
+                    break;
+                case 0x3e: //mvi a
+                    Registers.A = _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0xc3://jump
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        ProgramCounter = dest;
+                    }
+                    ProgramCounter += 3;
+                    break;
+                case 0xc5://push b
+                    PushStack("b");
+                    ProgramCounter++;
+                    break;
+                case 0xd5://push d
+                    PushStack("d");
+                    ProgramCounter++;
+                    break;
+                case 0xe5://push h
+                    PushStack("h");
+                    ProgramCounter++;
+                    break;
+                case 0xc1://pop b
+                    PopStack("b");
+                    ProgramCounter++;
+                    break;
+                case 0xd1://pop d
+                    PopStack("d");
+                    ProgramCounter++;
+                    break;
+                case 0xe1://pop h
+                    PopStack("h");
+                    ProgramCounter++;
+                    break;
+                case 0x76://hlt
+                    Stop();
+                    Console.WriteLine("Finished execution");
+                    break;
+                default:
+                    if (_mov(op)) { break; }
+                    throw new Exception("Processor encountered unrecognized opcode");
+            }
+
+            if (ProgramCounter >= _memory.MemoryData.TotalSize)
             {
                 _timer.Enabled = false;
-                Console.WriteLine("Finished execution");
+                Console.WriteLine("Finished execution because program counter run outside of memory");
                 return;
-                //throw new NullReferenceException("Program run out of operations but HALT was not executed");
             }
-            _operations[_operationCounter].Execute();
-            _operationCounter++;
         }
 
         public void Stop()
@@ -322,7 +425,6 @@ namespace Interpreter
         public void Run()
         {
             Step();
-            _operationCounter = 0;
             _timer.Enabled = true;
             _timer.AutoReset = true;
         }

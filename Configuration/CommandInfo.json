@@ -19,121 +19,144 @@
             "Arguments": [
                 0,
                 1
-            ]
+            ],
+            "OpCode": "0"
         },
         "mov": {
             "Arguments": [
                 0,
                 0
-            ]
+            ],
+            "OpCode": "0"
         },
         "sta": {
             "Arguments": [
                 2
-            ]
+            ],
+            "OpCode": "32"
         },
         "lda": {
             "Arguments": [
                 2
-            ]
+            ],
+            "OpCode": "3as"
         },
         "add": {
             "Arguments": [
                 0
-            ]
+            ],
+            "OpCode": "0"
         },
         "adc": {
             "Arguments": [
                 0
-            ]
+            ],
+            "OpCode": "0"
         },
         "adi": {
             "Arguments": [
                 1
-            ]
+            ],
+            "OpCode": "0"
         },
         "aci": {
             "Arguments": [
                 1
-            ]
+            ],
+            "OpCode": "0"
         },
         "cpi": {
             "Arguments": [
                 1
-            ]
+            ],
+            "OpCode": "fe"
         },
         "cmp": {
             "Arguments": [
                 0
-            ]
+            ],
+            "OpCode": "0"
         },
         "jmp": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "c3"
         },
         "jm": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "fa"
         },
         "jpe": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "ea"
         },
         "jc": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "da"
         },
         "jz": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "ca"
         },
         "jp": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "f2"
         },
         "jpo": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "e2"
         },
         "jnc": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "d2"
         },
         "jnz": {
             "Arguments": [
                 4
-            ]
+            ],
+            "OpCode": "c2"
         },
         "out": {
             "Arguments": [
                 1
-            ]
-        },
-        "outd": {
-            "Arguments": [
-                0
-            ]
+            ],
+            "OpCode": "d3"
         },
         "push": {
             "Arguments": [
                 0
-            ]
+            ],
+            "OpCode": "0"
         },
         "pop": {
             "Arguments": [
                 0
-            ]
+            ],
+            "OpCode": "0"
         },
-        "nop": {},
-        "hlt": {},
-        "stc": {}
+        "nop": {
+            "OpCode": "0"
+        },
+        "hlt": {
+            "OpCode": "76"
+        },
+        "stc": {
+            "OpCode": "37"
+        }
     }
 }

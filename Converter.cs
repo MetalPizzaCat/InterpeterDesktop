@@ -22,10 +22,6 @@ namespace Interpreter
 
     public class ProcessedCodeInfo
     {
-        /// <summary>
-        /// All of the operations that were in the original code
-        /// </summary>
-        public List<OperationBase> Operations;
         public Dictionary<string, int> JumpDestinations;
         /// <summary>
         /// How many bytes of memory this program will occupy
@@ -42,7 +38,6 @@ namespace Interpreter
 
         public ProcessedCodeInfo()
         {
-            Operations = new List<OperationBase>();
             JumpDestinations = new Dictionary<string, int>();
             Length = 0;
             CommandBytes = new List<byte>();
@@ -53,6 +48,8 @@ namespace Interpreter
 
     public static class Converter
     {
+
+        private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex OperationSeparator = new Regex(@"([a-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -124,12 +121,14 @@ namespace Interpreter
             ProcessorCommandsInfo info = Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessorCommandsInfo>(infoText) ?? throw new NullReferenceException("Unable to process configuration");
 
             ProcessedCodeInfo result = new ProcessedCodeInfo();
-            List<OperationBase> operations = new List<OperationBase>();
             //jumps that were referred to by call/jump commands
             //used for checking if jump destination is valid at assemble time
             Dictionary<int, string> referredJumps = new Dictionary<int, string>();
             Dictionary<int, int> referredAddresses = new Dictionary<int, int>();
+            //Key is jump label, value is where to place address of the jump label
+            Dictionary<string, int> jumps = new Dictionary<string, int>();
             int lineId = 0;
+            int address = 0;
             string[] lines = code.Split("\n");
             foreach (string line in lines)
             {
@@ -142,7 +141,7 @@ namespace Interpreter
                 }
                 if (JumpLabelRegex.IsMatch(cleanLine))
                 {
-                    result.JumpDestinations.Add(JumpLabelRegex.Match(cleanLine).Value, result.Operations.Count - 1);
+                    result.JumpDestinations.Add(JumpLabelRegex.Match(cleanLine).Value, result.Length);
                     lineId++;
                     continue;
                 }
@@ -161,98 +160,123 @@ namespace Interpreter
                     continue;
                 }
 
-                if (info.JumpCommands.Contains(matches[0].Value))
-                {
-                    referredJumps.Add(lineId, matches[1].Value);
-                }
                 if (info.StaticAddressCommands.Contains(matches[0].Value))
                 {
                     referredAddresses.Add(lineId, Convert.ToUInt16(matches[1].Value, 16));
                 }
 
+
+                // handle commands that use different opcodes for combinations of registers
                 switch (matches[0].Value)
                 {
                     case "mov":
-                        result.Operations.Add(new RegisterMemoryMoveOperation(matches[1].Value, matches[2].Value, interpreter));
+                        {
+                            byte byteBase = (byte)(0x40 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x8);
+                            byteBase += (byte)_registerNames.IndexOf(matches[2].Value.ToLower());
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
                     case "mvi":
-                        result.Operations.Add(new RegisterMemoryAssignOperation(matches[1].Value, Convert.ToByte(matches[2].Value, 16), interpreter));
+                        {
+                            byte byteBase = (byte)(0x06 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x8);
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        result.CommandBytes.Add(Convert.ToByte(matches[2].Value, 16));//write the argument
                         break;
-                    case "sta":
-                        result.Operations.Add(new StoreAccumulatorOperation(Convert.ToUInt16(matches[1].Value, 16), interpreter));
-                        break;
-                    case "lda":
-                        result.Operations.Add(new LoadAccumulatorOperation(Convert.ToUInt16(matches[1].Value, 16), interpreter));
-                        break;
+
                     case "add":
-                        result.Operations.Add(new AddAccumulatorOperation(matches[1].Value, interpreter));
-                        break;
-                    case "adi":
-                        result.Operations.Add(new AddAccumulatorConstOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
-                        break;
-                    case "cmp":
-                        result.Operations.Add(new CompareOperation(matches[1].Value, interpreter));
-                        break;
-                    case "cpi":
-                        result.Operations.Add(new CompareConstOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
-                        break;
-                    case "aci":
-                        result.Operations.Add(new AddAccumulatorConstCarryOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
+                        {
+                            byte byteBase = (byte)(0x80 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
                     case "adc":
-                        result.Operations.Add(new AddAccumulatorCarryOperation(matches[1].Value, interpreter));
+                        {
+                            byte byteBase = (byte)(0x88 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
-                    case "stc":
-                        result.Operations.Add(new SetCarryBitOperation(interpreter));
+                    case "adi":
+                        {
+                            byte byteBase = (byte)(0x80 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        result.CommandBytes.Add(Convert.ToByte(matches[1].Value, 16));//write the argument
                         break;
-                    case "jmp":
-                        result.Operations.Add(new JumpOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jnz":
-                        result.Operations.Add(new JumpIfNotZeroOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jz":
-                        result.Operations.Add(new JumpIfZeroOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jnc":
-                        result.Operations.Add(new JumpIfNotCarryOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jc":
-                        result.Operations.Add(new JumpIfCarryOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jpo":
-                        result.Operations.Add(new JumpIfParityOddOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jpe":
-                        result.Operations.Add(new JumpIfParityEvenOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jm":
-                        result.Operations.Add(new JumpIfNegativeOperation(matches[1].Value, interpreter));
-                        break;
-                    case "jp":
-                        result.Operations.Add(new JumpIfPositiveOperation(matches[1].Value, interpreter));
-                        break;
-                    case "out":
-                        result.Operations.Add(new OutOperation(Convert.ToByte(matches[1].Value, 16), interpreter));
-                        break;
-                    case "outd":
-                        result.Operations.Add(new OutExtendedOperation(matches[1].Value, interpreter));
+                    case "cmp":
+                        {
+                            byte byteBase = (byte)(0xbf + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
                     case "push":
-                        result.Operations.Add(new PushOperation(matches[1].Value, interpreter));
+                        {
+                            byte byteBase = 0xc5;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
                     case "pop":
-                        result.Operations.Add(new PopOperation(matches[1].Value, interpreter));
+                        {
+                            byte byteBase = 0xc1;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
-                    case "nop":
-                        result.Operations.Add(new NoOperation(interpreter));
-                        break;
-                    case "hlt":
-                        result.Operations.Add(new HaltOperation(interpreter));
+                    //Every other operation will just have it's byte written down and arguments written out 
+                    default:
+                        {
+                            CommandInfo op = info.Commands[matches[0].Value];
+                            result.CommandBytes.Add(Convert.ToByte(op.OpCode, 16));//write the argument
+                            for (int i = 1; i < matches.Count; i++)
+                            {
+                                switch (op.Arguments[i - 1])
+                                {
+                                    case CommandArgumentType.Int8:
+                                        result.CommandBytes.Add(Convert.ToByte(matches[i].Value, 16));//write the argument
+                                        break;
+                                    case CommandArgumentType.Int16:
+                                        //First store argument's L then H 
+                                        ushort val = Convert.ToUInt16(matches[i].Value, 16);
+                                        result.CommandBytes.Add((byte)(val & 0xff));
+                                        result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                                        break;
+                                }
+                            }
+                        }
+                        if (info.JumpCommands.Contains(matches[0].Value))
+                        {
+                            referredJumps.Add(lineId, matches[1].Value);
+                            jumps.Add(matches[1].Value, result.CommandBytes.Count);
+                            result.CommandBytes.Add(0);
+                            result.CommandBytes.Add(0);
+                        }
                         break;
                 }
+                address += info.Commands[matches[0].Value].Arguments.Count + 1;
                 result.Length += info.Commands[matches[0].Value].Arguments.Count + 1;
-                //TODO: Add recording of operation byte code
                 lineId++;
             }
             foreach (var jump in referredJumps)
@@ -275,13 +299,15 @@ namespace Interpreter
                 }
 #endif
             }
-            int offset = 0;
-            foreach (OperationBase op in result.Operations)
+            foreach (var jump in jumps)
             {
-                foreach (byte b in op.ByteCode)
+                if (!result.JumpDestinations.ContainsKey(jump.Key))
                 {
-                    result.CommandBytes.Add(b);
+                    continue;
                 }
+                ushort dest = (ushort)result.JumpDestinations[jump.Key];
+                result.CommandBytes[jump.Value] = (byte)(dest & 0xff);
+                result.CommandBytes[jump.Value + 1] = (byte)((dest & 0xff00) >> 8);
             }
             result.Success = result.Errors.Count == 0;
             return result;

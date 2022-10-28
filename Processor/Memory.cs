@@ -155,7 +155,7 @@ namespace Interpreter
             int writeOffset = 0;
             foreach (MemoryGridRow row in _memoryDisplayGrid)
             {
-                for (int i = 0; i < 0x10; i++)
+                for (int i = 0; i <= 0xf; i++)
                 {
                     row[i] = (writeOffset >= _rom.Length ? (byte)0 : _rom[writeOffset]);
                     writeOffset++;

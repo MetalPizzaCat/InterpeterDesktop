@@ -11,6 +11,8 @@ namespace InterpreterDesktop
     {
 
         private Interpreter.Interpreter _interpreter;
+
+        public Interpreter.Interpreter InterpreterObject => _interpreter;
         private bool _displayOutAsText = false;
 
         private ObservableCollection<string> _errors = new ObservableCollection<string>();
@@ -85,7 +87,6 @@ namespace InterpreterDesktop
                 if (code.Success)
                 {
                     _interpreter.SetCode(code);
-                    _interpreter.Memory.WriteRom(code.CommandBytes.ToArray());
                     _interpreter.ResetProcessor();
 
                     _interpreter.Run();
@@ -110,6 +111,7 @@ namespace InterpreterDesktop
                 Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
                 _displayErrors(code.Errors);
                 _interpreter.SetCode(code);
+                _interpreter.ResetProcessor();
             }
         }
 
