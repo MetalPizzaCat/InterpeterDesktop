@@ -196,6 +196,18 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "sub":
+                        {
+                            byte byteBase = (byte)(0x90 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+                    case "sbb":
+                        {
+                            byte byteBase = (byte)(0x98 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
                     case "cmp":
                         {
                             byte byteBase = (byte)(0xbf + _registerNames.IndexOf(matches[1].Value.ToLower()));

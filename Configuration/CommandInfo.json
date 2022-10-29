@@ -65,6 +65,18 @@
             ],
             "OpCode": "ce"
         },
+        "sub" :{
+            "Arguments" : [
+                0
+            ],
+            "OpCode" : 0
+        },
+        "sbb" : {
+            "Arguments" : [
+                0
+            ],
+            "OpCode" : 0
+        },
         "sbi": {
             "Arguments": [
                 1

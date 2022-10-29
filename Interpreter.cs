@@ -323,6 +323,37 @@ namespace Interpreter
             ProgramCounter += 3;
         }
 
+        private bool _add(byte op)
+        {
+            int high = op & 0xf0;
+            int low = op & 0x0f;
+            if (high != 0x80) // add commands are in 0x80 column
+            {
+                return false;
+            }
+
+            byte value = GetRegisterValue(_registerNames[low > 0x7 ? low - 0x8 : low]);
+            Registers.A += (byte)(value + (low > 0x7 ? (Flags.C ? 1 : 0) : 0));
+            ProgramCounter++;
+            return true;
+        }
+
+        private bool _sub(byte op)
+        {
+            int high = op & 0xf0;
+            int low = op & 0x0f;
+            if (high != 0x90) // add commands are in 0x80 column
+            {
+                return false;
+            }
+
+            byte value = GetRegisterValue(_registerNames[low > 0x7 ? low - 0x8 : low]);
+            Registers.A -= (byte)(value + (low > 0x7 ? (Flags.C ? 1 : 0) : 0));
+            ProgramCounter++;
+
+            return true;
+        }
+
         public void Step()
         {
             byte op = _memory[(ushort)ProgramCounter];
@@ -459,12 +490,28 @@ namespace Interpreter
                     Flags.C = true;
                     ProgramCounter++;
                     break;
+                case 0x32: // sta
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        _memory[dest] = Registers.A;
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0x3A: // lda
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        Registers.A = _memory[dest];
+                        ProgramCounter += 3;
+                    }
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");
                     break;
                 default:
                     if (_mov(op)) { break; }
+                    if (_add(op)) { break; }
+                    if (_sub(op)) { break; }
                     throw new Exception("Processor encountered unrecognized opcode");
             }
 
