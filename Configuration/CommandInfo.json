@@ -65,17 +65,17 @@
             ],
             "OpCode": "ce"
         },
-        "sub" :{
-            "Arguments" : [
+        "sub": {
+            "Arguments": [
                 0
             ],
-            "OpCode" : 0
+            "OpCode": 0
         },
-        "sbb" : {
-            "Arguments" : [
+        "sbb": {
+            "Arguments": [
                 0
             ],
-            "OpCode" : 0
+            "OpCode": 0
         },
         "sbi": {
             "Arguments": [
@@ -170,6 +170,13 @@
         "pop": {
             "Arguments": [
                 0
+            ],
+            "OpCode": "0"
+        },
+        "lxi": {
+            "Arguments": [
+                0,
+                2
             ],
             "OpCode": "0"
         },

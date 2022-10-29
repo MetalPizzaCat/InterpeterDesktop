@@ -250,6 +250,28 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "lxi":
+                        {
+                            byte byteBase = 0x01;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                                case "sp":
+                                    byteBase += 0x30;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                            ushort val = Convert.ToUInt16(matches[2].Value, 16);
+                            result.CommandBytes.Add((byte)(val & 0xff));
+                            result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                        }
+
+                        break;
                     //Every other operation will just have it's byte written down and arguments written out 
                     default:
                         {

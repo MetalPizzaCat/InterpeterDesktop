@@ -556,6 +556,27 @@ namespace Interpreter
                         ProgramCounter += 3;
                     }
                     break;
+                case 0x01://lxi b
+                    {
+                        Registers.C = _memory[(ushort)(ProgramCounter + 1)];
+                        Registers.B = _memory[(ushort)(ProgramCounter + 2)];
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0x21://lxi h
+                    {
+                        Registers.L = _memory[(ushort)(ProgramCounter + 1)];
+                        Registers.H = _memory[(ushort)(ProgramCounter + 2)];
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0x31://lxi sp
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        _memory.StackPointer = dest;
+                        ProgramCounter += 3;
+                    }
+                    break;
                 case 0xfe://cpi
                     _compare(_memory[(ushort)(ProgramCounter + 1)]);
                     _programCounter += 2;
