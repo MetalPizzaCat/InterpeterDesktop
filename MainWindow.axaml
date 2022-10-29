@@ -28,13 +28,20 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
                 <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
-mvi a,4
-sta 8000
-mvi h,80
-mvi l,00
-mvi a,6
-sub m
-hlt
+mvi a,5
+mvi c,6
+mvi b,0
+mvi h,1
+loop:
+adi 1
+mov d,a
+mov a,c
+sbi 1
+mov c,a
+cmp b
+mov a,d
+jnz loop
+hlt 
                 </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>

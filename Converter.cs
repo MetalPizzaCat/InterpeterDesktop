@@ -141,7 +141,7 @@ namespace Interpreter
                 }
                 if (JumpLabelRegex.IsMatch(cleanLine))
                 {
-                    result.JumpDestinations.Add(JumpLabelRegex.Match(cleanLine).Value, result.Length);
+                    result.JumpDestinations.Add(JumpLabelRegex.Match(cleanLine).Value, result.CommandBytes.Count);
                     lineId++;
                     continue;
                 }
@@ -210,7 +210,7 @@ namespace Interpreter
                         break;
                     case "cmp":
                         {
-                            byte byteBase = (byte)(0xbf + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            byte byteBase = (byte)(0xb8 + _registerNames.IndexOf(matches[1].Value.ToLower()));
                             result.CommandBytes.Add(byteBase);
                         }
                         break;

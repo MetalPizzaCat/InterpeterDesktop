@@ -212,7 +212,7 @@ namespace Interpreter
             //TODO: uncomment to get access to full 64kb
             //_memory = new Memory(0, ushort.MaxValue, 0);
             _memory = new Memory();
-            _timer = new Timer(300);
+            _timer = new Timer(100);
             _timer.Enabled = false;
             _timer.Elapsed += _onTimerTimeout;
         }
@@ -320,7 +320,7 @@ namespace Interpreter
         {
             ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
             ProgramCounter = dest;
-            ProgramCounter += 3;
+            //ProgramCounter += 3;
         }
 
         private bool _add(byte op)
@@ -347,6 +347,18 @@ namespace Interpreter
             Flags.C = Registers.A < value;
         }
 
+        private bool _cmp(byte op)
+        {
+            if (op < 0xb8 || op > 0xbf)
+            {
+                return false;
+            }
+            int id = op - 0xb8;
+            _compare(GetRegisterValue(_registerNames[id]));
+            _programCounter++;
+            return true;
+        }
+
         private bool _sub(byte op)
         {
             int high = op & 0xf0;
@@ -366,11 +378,10 @@ namespace Interpreter
         public void Step()
         {
             byte op = _memory[(ushort)ProgramCounter];
-
-
             switch (op)
             {
                 case 0:
+                    ProgramCounter++;
                     break;
                 case 0x06://mvi b
                     Registers.B = _memory[(ushort)(ProgramCounter + 1)];
@@ -428,11 +439,19 @@ namespace Interpreter
                     {
                         _jmp();
                     }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
                     break;
                 case 0xc2://jnz
                     if (!_flags.Z)
                     {
                         _jmp();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
                     }
                     break;
                 case 0xf2://jp
@@ -440,11 +459,19 @@ namespace Interpreter
                     {
                         _jmp();
                     }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
                     break;
                 case 0xfa://jm
                     if (_flags.S)
                     {
                         _jmp();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
                     }
                     break;
                 case 0xda://jc
@@ -452,11 +479,19 @@ namespace Interpreter
                     {
                         _jmp();
                     }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
                     break;
                 case 0xd2://jnc
                     if (!_flags.C)
                     {
                         _jmp();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
                     }
                     break;
                 case 0xea://jpe
@@ -464,11 +499,19 @@ namespace Interpreter
                     {
                         _jmp();
                     }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
                     break;
                 case 0xe2://jpo
                     if (_flags.P)
                     {
                         _jmp();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
                     }
                     break;
                 case 0xc5://push b
@@ -495,7 +538,7 @@ namespace Interpreter
                     PopStack("h");
                     ProgramCounter++;
                     break;
-                case 0x37:
+                case 0x37://stc
                     Flags.C = true;
                     ProgramCounter++;
                     break;
@@ -513,6 +556,10 @@ namespace Interpreter
                         ProgramCounter += 3;
                     }
                     break;
+                case 0xfe://cpi
+                    _compare(_memory[(ushort)(ProgramCounter + 1)]);
+                    _programCounter += 2;
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");
@@ -521,6 +568,7 @@ namespace Interpreter
                     if (_mov(op)) { break; }
                     if (_add(op)) { break; }
                     if (_sub(op)) { break; }
+                    if (_cmp(op)) { break; }
                     throw new Exception("Processor encountered unrecognized opcode");
             }
 

@@ -21,7 +21,7 @@ public class MemoryGridRow : INotifyPropertyChanged
         set
         {
             _memory[i] = value;
-            PropertyChanged?.Invoke($"X{i.ToString("X")}", new PropertyChangedEventArgs($"X{i}"));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs($"X{i.ToString("X1")}"));
         }
     }
 
