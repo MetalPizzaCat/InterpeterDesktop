@@ -9,7 +9,15 @@
         "jp",
         "jpo",
         "jnc",
-        "jnz"
+        "jnz",
+        "cm",
+        "ce",
+        "cc",
+        "cz",
+        "cp",
+        "cpo",
+        "cnc",
+        "cnz"
     ],
     "StaticAddressCommands": [
         "sta"
@@ -100,6 +108,96 @@
                 0
             ],
             "OpCode": "0"
+        },
+        "call": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "cd"
+        },
+        "cm": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "fc"
+        },
+        "cpe": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "ec"
+        },
+        "cc": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "dc"
+        },
+        "cz": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "cc"
+        },
+        "cp": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "f4"
+        },
+        "cpo": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "e4"
+        },
+        "cnc": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "d4"
+        },
+        "cnz": {
+            "Arguments": [
+                4
+            ],
+            "OpCode": "c4"
+        },
+        "ret": {
+            "Arguments": [],
+            "OpCode": "c9"
+        },
+        "rm": {
+            "Arguments": [],
+            "OpCode": "f8"
+        },
+        "rpe": {
+            "Arguments": [],
+            "OpCode": "e8"
+        },
+        "rc": {
+            "Arguments": [],
+            "OpCode": "d8"
+        },
+        "rz": {
+            "Arguments": [],
+            "OpCode": "c8"
+        },
+        "rp": {
+            "Arguments": [],
+            "OpCode": "f0"
+        },
+        "rpo": {
+            "Arguments": [],
+            "OpCode": "e0"
+        },
+        "rnc": {
+            "Arguments": [],
+            "OpCode": "d0"
+        },
+        "rnz": {
+            "Arguments": [],
+            "OpCode": "c0"
         },
         "jmp": {
             "Arguments": [

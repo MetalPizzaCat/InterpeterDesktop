@@ -1,14 +1,3 @@
-/**
-Dear reader BEWARE! 
-The idea behind this emulator is not greatest as instead of using actual opcodes during execution this program instead generates
-an execution list with it runs instead
-This approach is rather inefficient, but it was done due to how opcodes in intel 8080 are designed'
-To save up on memory it has an opcode for every variation of a command, instead of encoding that in an additional byte
-Because of this, executing directly from codes would imply having a case for every variation(yes it could be accounted for because of HOW
-they are placed in the op code table, but by the time i'm writing this message it would be rather inefficient to turn back(?))
-*/
-
-//TODO: Refactor how opcodes are handled cause using classes for every operation is clunky
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -180,6 +169,18 @@ namespace Interpreter
             _memory.StackPointer = sp;
         }
 
+        /// <summary>
+        /// Pushes value onto the stack
+        /// </summary>
+        public void PushStack(ushort value)
+        {
+            ushort sp = _memory.StackPointer;
+            _memory[sp] = (byte)((value & 0xFF00) >> 8);
+            _memory[(ushort)(sp - 1)] = (byte)(value & 0x00FF);
+            sp -= 2;
+            _memory.StackPointer = sp;
+        }
+
 
         public void PopStack(string destinationPairName)
         {
@@ -203,6 +204,17 @@ namespace Interpreter
             }
             sp += 2;
             _memory.StackPointer = sp;
+        }
+
+        public ushort PopStack()
+        {
+            ushort sp = _memory.StackPointer;
+            byte h = _memory[(ushort)(sp + 2)];
+            byte l = _memory[(ushort)(sp + 1)];
+            sp += 2;
+            _memory.StackPointer = sp;
+
+            return (ushort)((h << 8) | l);
         }
 
         public Interpreter()
@@ -320,7 +332,6 @@ namespace Interpreter
         {
             ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
             ProgramCounter = dest;
-            //ProgramCounter += 3;
         }
 
         private bool _add(byte op)
@@ -373,6 +384,13 @@ namespace Interpreter
             ProgramCounter++;
 
             return true;
+        }
+
+        private void _call()
+        {
+            ushort ret = (ushort)(ProgramCounter + 2);
+            PushStack(ret);
+            _jmp();
         }
 
         public void Step()
@@ -574,6 +592,172 @@ namespace Interpreter
                     {
                         ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
                         _memory.StackPointer = dest;
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xcd: //call
+                    _call();
+                    break;
+                case 0xc9://ret
+                    ProgramCounter = PopStack();
+                    break;
+                case 0xc8: // rz
+                    if (Flags.Z)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xc0://rnz
+                    if (!Flags.Z)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xf8: // rm
+                    if (Flags.S)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xf0://rp
+                    if (!Flags.S)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xD8: // rc
+                    if (Flags.C)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xD0://rnc
+                    if (!Flags.C)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xe8: // rpe
+                    if (Flags.P)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xe0://rpo
+                    if (!Flags.P)
+                    {
+                        ProgramCounter = PopStack();
+                    }
+                    else
+                    {
+                        ProgramCounter += 1;
+                    }
+                    break;
+                case 0xcc: // cz
+                    if (Flags.Z)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xc4://cnz
+                    if (!Flags.Z)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xfC: // cm
+                    if (Flags.S)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xf4://cp
+                    if (!Flags.S)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xdc: // cc
+                    if (Flags.C)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xD4://cnc
+                    if (!Flags.C)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xec: // cpe
+                    if (Flags.P)
+                    {
+                        _call();
+                    }
+                    else
+                    {
+                        ProgramCounter += 3;
+                    }
+                    break;
+                case 0xe4://cpo
+                    if (!Flags.P)
+                    {
+                        _call();
+                    }
+                    else
+                    {
                         ProgramCounter += 3;
                     }
                     break;
