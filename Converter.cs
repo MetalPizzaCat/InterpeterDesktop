@@ -196,13 +196,6 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
-                    case "adi":
-                        {
-                            byte byteBase = (byte)(0x80 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        result.CommandBytes.Add(Convert.ToByte(matches[1].Value, 16));//write the argument
-                        break;
                     case "cmp":
                         {
                             byte byteBase = (byte)(0xbf + _registerNames.IndexOf(matches[1].Value.ToLower()));

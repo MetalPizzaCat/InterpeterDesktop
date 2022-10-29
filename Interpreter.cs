@@ -316,6 +316,13 @@ namespace Interpreter
             return true;
         }
 
+        private void _jmp()
+        {
+            ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+            ProgramCounter = dest;
+            ProgramCounter += 3;
+        }
+
         public void Step()
         {
             byte op = _memory[(ushort)ProgramCounter];
@@ -357,12 +364,72 @@ namespace Interpreter
                     Registers.A = _memory[(ushort)(ProgramCounter + 1)];
                     ProgramCounter += 2;
                     break;
+                case 0xc6://adi
+                    Registers.A += _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0xce://aci
+                    Registers.A += (byte)(_memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
+                    ProgramCounter += 2;
+                    break;
+                case 0xd6://sui
+                    Registers.A -= _memory[(ushort)(ProgramCounter + 1)];
+                    ProgramCounter += 2;
+                    break;
+                case 0xde://sbi
+                    Registers.A -= (byte)(_memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
+                    ProgramCounter += 2;
+                    break;
                 case 0xc3://jump
+                    _jmp();
+                    break;
+                case 0xca://jz
+                    if (_flags.Z)
                     {
-                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
-                        ProgramCounter = dest;
+                        _jmp();
                     }
-                    ProgramCounter += 3;
+                    break;
+                case 0xc2://jnz
+                    if (!_flags.Z)
+                    {
+                        _jmp();
+                    }
+                    break;
+                case 0xf2://jp
+                    if (!_flags.S)
+                    {
+                        _jmp();
+                    }
+                    break;
+                case 0xfa://jm
+                    if (_flags.S)
+                    {
+                        _jmp();
+                    }
+                    break;
+                case 0xda://jc
+                    if (_flags.C)
+                    {
+                        _jmp();
+                    }
+                    break;
+                case 0xd2://jnc
+                    if (!_flags.C)
+                    {
+                        _jmp();
+                    }
+                    break;
+                case 0xea://jpe
+                    if (!_flags.P)
+                    {
+                        _jmp();
+                    }
+                    break;
+                case 0xe2://jpo
+                    if (_flags.P)
+                    {
+                        _jmp();
+                    }
                     break;
                 case 0xc5://push b
                     PushStack("b");
@@ -386,6 +453,10 @@ namespace Interpreter
                     break;
                 case 0xe1://pop h
                     PopStack("h");
+                    ProgramCounter++;
+                    break;
+                case 0x37:
+                    Flags.C = true;
                     ProgramCounter++;
                     break;
                 case 0x76://hlt
@@ -417,6 +488,7 @@ namespace Interpreter
 
         public void ResetProcessor()
         {
+            _programCounter = 0;
             _registers.Reset();
             _memory.Reset();
             _flags.Reset();

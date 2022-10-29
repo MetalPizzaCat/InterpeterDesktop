@@ -57,13 +57,25 @@
             "Arguments": [
                 1
             ],
-            "OpCode": "0"
+            "OpCode": "c6"
         },
         "aci": {
             "Arguments": [
                 1
             ],
-            "OpCode": "0"
+            "OpCode": "ce"
+        },
+        "sbi": {
+            "Arguments": [
+                1
+            ],
+            "OpCode": "de"
+        },
+        "sui": {
+            "Arguments": [
+                1
+            ],
+            "OpCode": "d6"
         },
         "cpi": {
             "Arguments": [
