@@ -338,6 +338,15 @@ namespace Interpreter
             return true;
         }
 
+        private void _compare(byte value)
+        {
+            int result = Registers.A - value;
+            Flags.Z = result == 0;
+            Flags.S = 0x80 == (result & 0x80);
+            Flags.P = Parity((ushort)result);
+            Flags.C = Registers.A < value;
+        }
+
         private bool _sub(byte op)
         {
             int high = op & 0xf0;
