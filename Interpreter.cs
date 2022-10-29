@@ -303,6 +303,78 @@ namespace Interpreter
             _flags.C = c;
         }
 
+        /// <summary>
+        /// Function that selects which register's value to use for _or
+        /// </summary>
+        private bool _ora(byte op)
+        {
+            if (op < 0xb0 || op > 0xb7)
+            {
+                return false;
+            }
+            int id = op - 0xb0;
+            _or(GetRegisterValue(_registerNames[id]));
+            _programCounter++;
+            return true;
+        }
+
+        /// <summary>
+        /// Function that selects which register's value to use for _and
+        /// </summary>
+        private bool _ana(byte op)
+        {
+            if (op < 0xa0 || op > 0xa7)
+            {
+                return false;
+            }
+            int id = op - 0xa0;
+            _and(GetRegisterValue(_registerNames[id]));
+            _programCounter++;
+            return true;
+        }
+
+        /// <summary>
+        /// Function that selects which register's value to use for _xor
+        /// </summary>
+        private bool _xra(byte op)
+        {
+            if (op < 0xa8 || op > 0xaf)
+            {
+                return false;
+            }
+            int id = op - 0xa8;
+            _xor(GetRegisterValue(_registerNames[id]));
+            _programCounter++;
+            return true;
+        }
+
+        private void _or(byte value)
+        {
+            ushort result = (ushort)(Registers.A | value);
+            CheckFlags(result);
+            Flags.C = false;
+            Flags.Ac = false;
+            Registers.A = (byte)(result & 0x00FF);
+        }
+
+        private void _and(byte value)
+        {
+            ushort result = (ushort)(Registers.A & value);
+            CheckFlags(result);
+            Flags.C = false;
+            Flags.Ac = false;
+            Registers.A = (byte)(result & 0x00FF);
+        }
+
+        private void _xor(byte value)
+        {
+            ushort result = (ushort)(Registers.A ^ value);
+            CheckFlags(result);
+            Flags.C = false;
+            Flags.Ac = false;
+            Registers.A = (byte)(result & 0x00FF);
+        }
+
         private bool _mov(byte op)
         {
             int movCheck = op & 0xF0;
@@ -761,9 +833,55 @@ namespace Interpreter
                         ProgramCounter += 3;
                     }
                     break;
+                case 0xf6://ori
+                    _or(_memory[(ushort)(ProgramCounter + 1)]);
+                    ProgramCounter += 2;
+                    break;
+                case 0xe6://ani
+                    _and(_memory[(ushort)(ProgramCounter + 1)]);
+                    ProgramCounter += 2;
+                    break;
+                case 0xee://xri
+                    _xor(_memory[(ushort)(ProgramCounter + 1)]);
+                    ProgramCounter += 2;
+                    break;
                 case 0xfe://cpi
                     _compare(_memory[(ushort)(ProgramCounter + 1)]);
                     _programCounter += 2;
+                    break;
+                case 0x17://ral
+                    {
+                        byte temp = Registers.A;
+                        byte msb = (byte)(temp >> 7);
+                        Registers.A = (byte)((temp << 1) | (Flags.C ? 1 : 0));
+                        Flags.C = msb == 1;
+                    }
+                    _programCounter++;
+                    break;
+                case 0x1f://rar
+                    {
+                        byte temp = Registers.A;
+                        byte msb = (byte)((temp >> 7) << 7);
+                        Registers.A = (byte)((temp >> 1) | ((Flags.C ? 1 : 0) << 7));
+                        Flags.C = msb == 1;
+                    }
+                    _programCounter++;
+                    break;
+                case 0x07://rlc
+                    {
+                        byte temp = Registers.A;
+                        Registers.A = (byte)(temp << 1 | temp >> 7);
+                        Flags.C = ((temp >> 7) > 0);
+                    }
+                    _programCounter++;
+                    break;
+                case 0x0f://rrc
+                    {
+                        byte temp = Registers.A;
+                        Registers.A = (byte)(temp >> 1 | temp << 7);
+                        Flags.C = ((Registers.A >> 7) > 0);
+                    }
+                    _programCounter++;
                     break;
                 case 0x76://hlt
                     Stop();
@@ -774,6 +892,9 @@ namespace Interpreter
                     if (_add(op)) { break; }
                     if (_sub(op)) { break; }
                     if (_cmp(op)) { break; }
+                    if (_ora(op)) { break; }
+                    if (_xra(op)) { break; }
+                    if (_ana(op)) { break; }
                     throw new Exception("Processor encountered unrecognized opcode");
             }
 

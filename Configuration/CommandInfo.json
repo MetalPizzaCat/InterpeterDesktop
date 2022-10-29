@@ -278,6 +278,58 @@
             ],
             "OpCode": "0"
         },
+        "ani": {
+            "Arguments": [
+                1
+            ],
+            "OpCode": "e6"
+        },
+        "ana": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "ori": {
+            "Arguments": [
+                1
+            ],
+            "OpCode": "f6"
+        },
+        "ora": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "xri": {
+            "Arguments": [
+                1
+            ],
+            "OpCode": "ee"
+        },
+        "xra": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "ral": {
+            "Arguments": [],
+            "OpCode": "17"
+        },
+        "rar": {
+            "Arguments": [],
+            "OpCode": "1f"
+        },
+        "rlc": {
+            "Arguments": [],
+            "OpCode": "07"
+        },
+        "rrc": {
+            "Arguments": [],
+            "OpCode": "0f"
+        },
         "nop": {
             "OpCode": "0"
         },

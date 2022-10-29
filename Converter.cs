@@ -152,6 +152,7 @@ namespace Interpreter
                     lineId++;
                     continue;
                 }
+                string name = matches[0].Value.ToLower();
                 string? error = _checkInputValidity(matches, info, interpreter);
                 if (error != null)
                 {
@@ -160,14 +161,14 @@ namespace Interpreter
                     continue;
                 }
 
-                if (info.StaticAddressCommands.Contains(matches[0].Value))
+                if (info.StaticAddressCommands.Contains(name))
                 {
                     referredAddresses.Add(lineId, Convert.ToUInt16(matches[1].Value, 16));
                 }
 
 
                 // handle commands that use different opcodes for combinations of registers
-                switch (matches[0].Value)
+                switch (name)
                 {
                     case "mov":
                         {
@@ -270,12 +271,29 @@ namespace Interpreter
                             result.CommandBytes.Add((byte)(val & 0xff));
                             result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
                         }
-
+                        break;
+                    case "ora":
+                        {
+                            byte byteBase = (byte)(0xB0 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+                    case "xra":
+                        {
+                            byte byteBase = (byte)(0xA8 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+                    case "ana":
+                        {
+                            byte byteBase = (byte)(0xA0 + _registerNames.IndexOf(matches[1].Value.ToLower()));
+                            result.CommandBytes.Add(byteBase);
+                        }
                         break;
                     //Every other operation will just have it's byte written down and arguments written out 
                     default:
                         {
-                            CommandInfo op = info.Commands[matches[0].Value];
+                            CommandInfo op = info.Commands[name];
                             result.CommandBytes.Add(Convert.ToByte(op.OpCode, 16));//write the argument
                             for (int i = 1; i < matches.Count; i++)
                             {
@@ -293,7 +311,7 @@ namespace Interpreter
                                 }
                             }
                         }
-                        if (info.JumpCommands.Contains(matches[0].Value))
+                        if (info.JumpCommands.Contains(name))
                         {
                             referredJumps.Add(lineId, matches[1].Value);
                             jumps.Add(matches[1].Value, result.CommandBytes.Count);
@@ -302,8 +320,8 @@ namespace Interpreter
                         }
                         break;
                 }
-                address += info.Commands[matches[0].Value].Arguments.Count + 1;
-                result.Length += info.Commands[matches[0].Value].Arguments.Count + 1;
+                address += info.Commands[name].Arguments.Count + 1;
+                result.Length += info.Commands[name].Arguments.Count + 1;
                 lineId++;
             }
             foreach (var jump in referredJumps)
