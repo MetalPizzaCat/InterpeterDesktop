@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace InterpreterDesktop
 {
@@ -64,6 +66,20 @@ namespace InterpreterDesktop
             this.DataContext = this;
         }
 
+        public async Task RunEmulator()
+        {
+            while (_interpreter.IsRunning)
+            {
+                _interpreter.Step();
+                if (_interpreter.CurrentStepCounter >= _interpreter.StepsBeforeSleep)
+                {
+                    await Task.Delay(1);
+                    _interpreter.ResetStepCounter();
+                }
+            }
+            System.Console.WriteLine("Exited execution");
+        }
+
         private void _onOutPortValueChanged(int port, byte value)
         {
             _output[port] = _displayOutAsText ? System.Text.Encoding.ASCII.GetString(new[] { value }) : value.ToString("X2");
@@ -89,7 +105,8 @@ namespace InterpreterDesktop
                     _interpreter.SetCode(code);
                     _interpreter.ResetProcessor();
 
-                    _interpreter.Run();
+                    Dispatcher.UIThread.Post(() => RunEmulator(), DispatcherPriority.Background);
+                    //_interpreter.Run();
                 }
             }
         }
