@@ -259,6 +259,12 @@
             ],
             "OpCode": "d3"
         },
+        "in": {
+            "Arguments": [
+                1
+            ],
+            "OpCode": "db"
+        },
         "push": {
             "Arguments": [
                 0

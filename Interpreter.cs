@@ -891,6 +891,12 @@ namespace Interpreter
                     }
                     _programCounter++;
                     break;
+                case 0xdb://in
+                    throw new NotImplementedException("IN is not implemented");
+                    break;
+                case 0xd3: // out
+                    SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");
