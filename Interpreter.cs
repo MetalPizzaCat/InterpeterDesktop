@@ -50,6 +50,14 @@ namespace Interpreter
         /// </summary>
         public Dictionary<string, int> _jumpDestinations = new Dictionary<string, int>();
 
+        private int _stepsBeforeSleep = 50;
+        private int _currentStepCounter = 0;
+
+        public int StepsBeforeSleep => _stepsBeforeSleep;
+        public int CurrentStepCounter => _currentStepCounter;
+
+        public bool IsRunning { get; set; } = true;
+
         /// <summary>
         /// Helper function that returns value stored in the register<para/>
         /// If name is invalid InterpreterInvalidRegisterException is thrown
@@ -883,6 +891,12 @@ namespace Interpreter
                     }
                     _programCounter++;
                     break;
+                case 0xdb://in
+                    throw new NotImplementedException("IN is not implemented");
+                    break;
+                case 0xd3: // out
+                    SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");
@@ -897,10 +911,11 @@ namespace Interpreter
                     if (_ana(op)) { break; }
                     throw new Exception("Processor encountered unrecognized opcode");
             }
-
+            _currentStepCounter++;
             if (ProgramCounter >= _memory.MemoryData.TotalSize)
             {
-                _timer.Enabled = false;
+                IsRunning = false;
+                //_timer.Enabled = false;
                 Console.WriteLine("Finished execution because program counter run outside of memory");
                 return;
             }
@@ -908,12 +923,18 @@ namespace Interpreter
 
         public void Stop()
         {
-            _timer.Enabled = false;
+            IsRunning = false;
+            //_timer.Enabled = false;
         }
 
         private void _onTimerTimeout(object? source, ElapsedEventArgs e)
         {
-            Step();
+            // Step();
+        }
+
+        public void ResetStepCounter()
+        {
+            _currentStepCounter = 0;
         }
 
         public void ResetProcessor()
@@ -922,13 +943,15 @@ namespace Interpreter
             _registers.Reset();
             _memory.Reset();
             _flags.Reset();
+            IsRunning = true;
+            _currentStepCounter = 0;
         }
 
         public void Run()
         {
             Step();
-            _timer.Enabled = true;
-            _timer.AutoReset = true;
+            //_timer.Enabled = true;
+            //_timer.AutoReset = true;
         }
     }
 }
