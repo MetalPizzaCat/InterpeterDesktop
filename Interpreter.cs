@@ -432,8 +432,11 @@ namespace Interpreter
             }
 
             byte value = GetRegisterValue(_registerNames[low > 0x7 ? low - 0x8 : low]);
-            Registers.A += (byte)(value + (low > 0x7 ? (Flags.C ? 1 : 0) : 0));
+            int carry = (low > 0x7 ? (Flags.C ? 1 : 0) : 0);
+            ushort result = (ushort)(Registers.A + value + carry);
+            Registers.A = (byte)result;
             ProgramCounter++;
+            CheckFlags(result);
             return true;
         }
 
@@ -468,9 +471,11 @@ namespace Interpreter
             }
 
             byte value = GetRegisterValue(_registerNames[low > 0x7 ? low - 0x8 : low]);
-            Registers.A -= (byte)(value + (low > 0x7 ? (Flags.C ? 1 : 0) : 0));
+            int carry = (low > 0x7 ? (Flags.C ? 1 : 0) : 0);
+            ushort result = (ushort)(Registers.A - value - carry);
+            Registers.A = (byte)result;
             ProgramCounter++;
-
+            CheckFlags(result);
             return true;
         }
 
