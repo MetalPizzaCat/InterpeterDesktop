@@ -356,6 +356,12 @@
         },
         "stc": {
             "OpCode": "37"
+        },
+        "cma": {
+            "OpCode": "2F"
+        },
+        "cmc ": {
+            "OpCode": "3F"
         }
     }
 }

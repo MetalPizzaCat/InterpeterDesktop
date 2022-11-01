@@ -997,6 +997,14 @@ namespace Interpreter
                 case 0xd3: // out
                     SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
                     break;
+                case 0x2f://cma
+                    Registers.A = (byte)(~Registers.A);
+                    _programCounter++;
+                    break;
+                case 0x3f://cmc
+                    Flags.C = !Flags.C;
+                    _programCounter++;
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");
