@@ -120,6 +120,23 @@ namespace Interpreter
             _rom = new byte[rom.Length];
             rom.CopyTo(_rom, 0);
         }
+
+        /// <summary>
+        /// Clears everything including protected ROM 
+        /// </summary>
+        public void ClearMemory()
+        {
+            _memory = new byte[_memoryData.TotalSize + 1];
+            foreach (MemoryGridRow row in _memoryDisplayGrid)
+            {
+                for (int i = 0; i <= 0xf; i++)
+                {
+                    row[i] = 0;
+                }
+            }
+            StackPointer = (ushort)_memoryData.StackAddress;
+        }
+
         /// <summary>
         /// Returns value in the memory that was dedicated for stack pointer
         /// </summary>
@@ -163,7 +180,7 @@ namespace Interpreter
             _protectedRom = new byte[_protectedMemoryLength];
             for (int i = _protectedMemoryStart / 0x10; i < (_protectedMemoryStart / 0x10 + _protectedMemoryLength / 0x10); i++)
             {
-                Array.Copy(_memoryDisplayGrid[i].Memory, 0, _protectedRom, i * 0x10 - _protectedMemoryStart , 0x10);
+                Array.Copy(_memoryDisplayGrid[i].Memory, 0, _protectedRom, i * 0x10 - _protectedMemoryStart, 0x10);
             }
         }
 

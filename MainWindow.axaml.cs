@@ -113,7 +113,7 @@ namespace InterpreterDesktop
 
         private void _clearRomPressed(object? sender, RoutedEventArgs e)
         {
-            
+            _interpreter.Memory.ClearMemory();
         }
 
         private async void _onSettingsButtonPressed(object? sender, RoutedEventArgs e)
