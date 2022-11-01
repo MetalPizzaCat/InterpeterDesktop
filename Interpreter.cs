@@ -50,7 +50,7 @@ namespace Interpreter
         /// </summary>
         public Dictionary<string, int> _jumpDestinations = new Dictionary<string, int>();
 
-        private int _stepsBeforeSleep = 50;
+        private int _stepsBeforeSleep = 1;
         private int _currentStepCounter = 0;
 
         public int StepsBeforeSleep => _stepsBeforeSleep;
@@ -296,6 +296,14 @@ namespace Interpreter
             _flags.C = value > 0xff;
         }
 
+        public void CheckFlagsArith(ushort value)
+        {
+            Flags.Z = (value & 0x00FF) == 0;
+            Flags.S = (value & 0x80) == 0x80;
+            Flags.P = Parity((ushort)(value & 0x00FF));
+            Flags.Ac = value > 0x09;
+        }
+
         /// <summary>
         /// Set group of flags, intended for cmp operation
         /// </summary>
@@ -471,6 +479,98 @@ namespace Interpreter
             ushort ret = (ushort)(ProgramCounter + 2);
             PushStack(ret);
             _jmp();
+        }
+
+        private void _increment(string name)
+        {
+            ushort result = (ushort)(GetRegisterValue(name) + 1);
+            SetRegisterValue(name, (byte)result);
+            CheckFlagsArith(result);
+        }
+
+        private void _decrement(string name)
+        {
+            ushort result = (ushort)(GetRegisterValue(name) - 1);
+            SetRegisterValue(name, (byte)result);
+            Flags.Z = result == 0;
+            Flags.S = (result & 0x80) == 0x80;
+            Flags.P = Parity(result);
+        }
+        private bool _inr(byte op)
+        {
+            if (op < 0x04 || op > 0x3c)
+            {
+                return false;
+            }
+
+            switch (op)
+            {
+                case 0x04:
+                    _increment("B");
+                    break;
+                case 0x0c:
+                    _increment("C");
+                    break;
+                case 0x14:
+                    _increment("D");
+                    break;
+                case 0x1c:
+                    _increment("E");
+                    break;
+                case 0x24:
+                    _increment("H");
+                    break;
+                case 0x2c:
+                    _increment("L");
+                    break;
+                case 0x34:
+                    _increment("M");
+                    break;
+                case 0x3c:
+                    _increment("A");
+                    break;
+                default:
+                    return false;
+            }
+            _programCounter++;
+            return true;
+        }
+
+        private bool _dcr(byte op)
+        {
+
+            switch (op)
+            {
+                case 0x05:
+                    _decrement("B");
+                    break;
+                case 0x0d:
+                    _decrement("C");
+                    break;
+                case 0x15:
+                    _decrement("D");
+                    break;
+                case 0x1d:
+                    _decrement("E");
+                    break;
+                case 0x25:
+                    _decrement("H");
+                    break;
+                case 0x2d:
+                    _decrement("L");
+                    break;
+                case 0x35:
+                    _decrement("M");
+                    break;
+                case 0x3d:
+                    _decrement("A");
+                    break;
+                default:
+                    return false;
+            }
+            _programCounter++;
+            return true;
+
         }
 
         public void Step()
@@ -909,6 +1009,8 @@ namespace Interpreter
                     if (_ora(op)) { break; }
                     if (_xra(op)) { break; }
                     if (_ana(op)) { break; }
+                    if (_inr(op)) { break; }
+                    if (_dcr(op)) { break; }
                     throw new Exception("Processor encountered unrecognized opcode");
             }
             _currentStepCounter++;

@@ -336,6 +336,18 @@
             "Arguments": [],
             "OpCode": "0f"
         },
+        "inr": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "dcr": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
         "nop": {
             "OpCode": "0"
         },

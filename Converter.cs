@@ -290,6 +290,18 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "inr":
+                        {
+                            byte byteBase = (byte)(0x04 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x08);
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+                    case "dcr":
+                        {
+                            byte byteBase = (byte)(0x05 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x08);
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
                     //Every other operation will just have it's byte written down and arguments written out 
                     default:
                         {
