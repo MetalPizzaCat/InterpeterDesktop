@@ -15,6 +15,8 @@ public class MemoryGridRow : INotifyPropertyChanged
 
     private byte[] _memory = new byte[0x10];
 
+    public byte[] Memory => _memory;
+
     public byte this[int i]
     {
         get => _memory[i];

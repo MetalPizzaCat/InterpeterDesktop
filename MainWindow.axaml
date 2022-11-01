@@ -11,7 +11,7 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open" />
-                <MenuItem Header="_Sai jusve" />
+                <MenuItem Header="_Save" />
                 <MenuItem Header="Save _as" />
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
@@ -21,6 +21,7 @@
                 <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
                 <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
                 <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_stopButtonPressed" />
+                <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_stopButtonPressed"/>
             </MenuItem>
             <MenuItem Header="_Settings" Click="_onSettingsButtonPressed" />
             <MenuItem Header="_About" />
@@ -94,42 +95,13 @@ hlt
                         </StackPanel>
                     </DockPanel>
                     <DockPanel DockPanel.Dock="Right">
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="2">
-                            <TextBlock> 0</TextBlock>
-                            <TextBlock> 1</TextBlock>
-                            <TextBlock> 2</TextBlock>
-                            <TextBlock> 3</TextBlock>
-                            <TextBlock> 4</TextBlock>
-                            <TextBlock> 5</TextBlock>
-                            <TextBlock> 6</TextBlock>
-                            <TextBlock> 7</TextBlock>
-                            <TextBlock> 8</TextBlock>
-                            <TextBlock> 9</TextBlock>
-                            <TextBlock> A</TextBlock>
-                            <TextBlock> B</TextBlock>
-                            <TextBlock> C</TextBlock>
-                            <TextBlock> D</TextBlock>
-                            <TextBlock> E</TextBlock>
-                            <TextBlock> F</TextBlock>
-                        </StackPanel>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="2">
-                            <TextBlock Text="{Binding Output[0] }" />
-                            <TextBlock Text="{Binding Output[1] }" />
-                            <TextBlock Text="{Binding Output[2] }" />
-                            <TextBlock Text="{Binding Output[3] }" />
-                            <TextBlock Text="{Binding Output[4] }" />
-                            <TextBlock Text="{Binding Output[5] }" />
-                            <TextBlock Text="{Binding Output[6] }" />
-                            <TextBlock Text="{Binding Output[7] }" />
-                            <TextBlock Text="{Binding Output[8] }" />
-                            <TextBlock Text="{Binding Output[9] }" />
-                            <TextBlock Text="{Binding Output[10]}" />
-                            <TextBlock Text="{Binding Output[11]}" />
-                            <TextBlock Text="{Binding Output[12]}" />
-                            <TextBlock Text="{Binding Output[13]}" />
-                            <TextBlock Text="{Binding Output[14]}" />
-                            <TextBlock Text="{Binding Output[15]}" />
-                        </StackPanel>
+                        <ItemsControl Items="{Binding Output}" >
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing = "1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
                         <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>

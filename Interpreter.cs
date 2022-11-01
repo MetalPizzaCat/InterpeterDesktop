@@ -143,7 +143,6 @@ namespace Interpreter
         public void SetCode(ProcessedCodeInfo code)
         {
             _jumpDestinations = code.JumpDestinations;
-            _memory.ProtectedMemoryLength = code.Length;
             _memory.WriteRom(code.CommandBytes.ToArray());
         }
 

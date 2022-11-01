@@ -110,6 +110,12 @@ namespace InterpreterDesktop
                 }
             }
         }
+
+        private void _clearRomPressed(object? sender, RoutedEventArgs e)
+        {
+            
+        }
+
         private async void _onSettingsButtonPressed(object? sender, RoutedEventArgs e)
         {
             SettingsWindow settingsWindow = new SettingsWindow();

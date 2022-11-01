@@ -90,20 +90,26 @@ namespace Interpreter
         private byte[] _rom;
 
         /// <summary>
-        /// Memory that program reserves for itself when it's assembled<para/>
-        /// This memory can not be written to and can only be used for execution
+        /// Protected ROM is part of the ROM that does not get reset during usual rom writes<para/>
+        /// This was not part of original processor and exists only to simplify inputting values in the emulator
         /// </summary>
-        private int _protectedMemoryLength = 0;
+        private byte[] _protectedRom;
+
+        /// <summary>
+        /// How long is the protected ROM area is<para/>
+        /// Protected rom area is part of the memory that doesn't get reset during ROM write. Used for user input
+        /// </summary>
+        private int _protectedMemoryLength = 0x1000;
+
+        /// <summary>
+        /// Where does there protected memory start<para/>
+        /// Protected rom area is part of the memory that doesn't get reset during ROM write. Used for user input
+        /// </summary>
+        private int _protectedMemoryStart = 0x4000;
 
         private MemorySegmentationData _memoryData;
 
         public MemorySegmentationData MemoryData => _memoryData;
-
-        public int ProtectedMemoryLength
-        {
-            get => _protectedMemoryLength;
-            set => _protectedMemoryLength = value;
-        }
 
         /// <summary>
         /// Overrides rom space with new rom<para/>
@@ -112,7 +118,7 @@ namespace Interpreter
         public void WriteRom(byte[] rom)
         {
             _rom = new byte[rom.Length];
-            rom.CopyTo(_rom,0);
+            rom.CopyTo(_rom, 0);
         }
         /// <summary>
         /// Returns value in the memory that was dedicated for stack pointer
@@ -148,16 +154,31 @@ namespace Interpreter
             Console.WriteLine("Memory modified");
         }
 
+
+        /// <summary>
+        /// Writes to protected rom based on values in the user input table
+        /// </summary>
+        private void _copyRom()
+        {
+            _protectedRom = new byte[_protectedMemoryLength];
+            for (int i = _protectedMemoryStart / 0x10; i < (_protectedMemoryStart / 0x10 + _protectedMemoryLength / 0x10); i++)
+            {
+                Array.Copy(_memoryDisplayGrid[i].Memory, 0, _protectedRom, i * 0x10 - _protectedMemoryStart , 0x10);
+            }
+        }
+
         public void Reset()
         {
+            _copyRom();
             _memory = new byte[_memoryData.TotalSize + 1];
+            Array.Copy(_protectedRom, 0, _memory, _protectedMemoryStart, _protectedMemoryLength);
             _rom.CopyTo(_memory, 0);
             int writeOffset = 0;
             foreach (MemoryGridRow row in _memoryDisplayGrid)
             {
                 for (int i = 0; i <= 0xf; i++)
                 {
-                    row[i] = (writeOffset >= _rom.Length ? (byte)0 : _rom[writeOffset]);
+                    row[i] = (writeOffset >= _rom.Length ? _memory[writeOffset] : _rom[writeOffset]);
                     writeOffset++;
                 }
             }
