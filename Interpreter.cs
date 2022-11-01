@@ -1010,6 +1010,10 @@ namespace Interpreter
                     Flags.C = !Flags.C;
                     _programCounter++;
                     break;
+                case 0xEB: //xchg
+                    (Registers.H, Registers.L, Registers.D, Registers.E) = (Registers.D, Registers.E, Registers.H, Registers.L);
+                    ProgramCounter++;
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");

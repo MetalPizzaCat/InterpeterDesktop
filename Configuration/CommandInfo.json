@@ -354,6 +354,9 @@
         "hlt": {
             "OpCode": "76"
         },
+        "xchg": {
+            "OpCode": "EB"
+        },
         "stc": {
             "OpCode": "37"
         },
