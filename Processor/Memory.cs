@@ -207,7 +207,7 @@ namespace Interpreter
             get => _memory[i];
             set
             {
-                if (i <= _memoryData.RomSize)
+                if (i < _memoryData.RomSize)
                 {
                     throw new ProtectedMemoryWriteException($"Attempted to write at {(i).ToString("X4")}. But 0000 to {(_memoryData.RomSize).ToString("X4")} is reserved memory");
                 }

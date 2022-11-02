@@ -1013,6 +1013,76 @@ namespace Interpreter
                     (Registers.H, Registers.L, Registers.D, Registers.E) = (Registers.D, Registers.E, Registers.H, Registers.L);
                     ProgramCounter++;
                     break;
+                case 0x03: // inx b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        value++;
+                        Registers.B = (byte)((value & 0xFF00) >> 8);
+                        Registers.C = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x13: // inx d
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        value++;
+                        Registers.D = (byte)((value & 0xFF00) >> 8);
+                        Registers.E = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x23: // inx h
+                    {
+                        ushort value = (ushort)(Registers.L | Registers.H << 8);
+                        value++;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x33: // inx sp
+                    {
+                        _memory.StackPointer++;
+                        _programCounter++;
+                    }
+                    break;
+                case 0x0b: // dcx b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        value--;
+                        Registers.B = (byte)((value & 0xFF00) >> 8);
+                        Registers.C = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x1b: // dcx d
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        value--;
+                        Registers.D = (byte)((value & 0xFF00) >> 8);
+                        Registers.E = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x2b: // dcx h
+                    {
+                        ushort value = (ushort)(Registers.L | Registers.H << 8);
+                        value--;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x3b: // dcx sp
+                    {
+                        _memory.StackPointer--;
+                        _programCounter++;
+                    }
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");
