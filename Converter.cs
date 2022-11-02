@@ -51,7 +51,7 @@ namespace Interpreter
 
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex OperationSeparator = new Regex(@"([a-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex OperationSeparator = new Regex(@"([A-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>

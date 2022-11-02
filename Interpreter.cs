@@ -765,6 +765,13 @@ namespace Interpreter
                         ProgramCounter += 3;
                     }
                     break;
+                case 0x11://lxi d
+                    {
+                        Registers.E = _memory[(ushort)(ProgramCounter + 1)];
+                        Registers.D = _memory[(ushort)(ProgramCounter + 2)];
+                        ProgramCounter += 3;
+                    }
+                    break;
                 case 0x21://lxi h
                     {
                         Registers.L = _memory[(ushort)(ProgramCounter + 1)];
@@ -1000,6 +1007,7 @@ namespace Interpreter
                     break;
                 case 0xd3: // out
                     SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
+                    _programCounter++;
                     break;
                 case 0x2f://cma
                     Registers.A = (byte)(~Registers.A);
