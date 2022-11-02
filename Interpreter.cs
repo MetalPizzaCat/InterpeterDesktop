@@ -1103,7 +1103,6 @@ namespace Interpreter
             if (ProgramCounter >= _memory.MemoryData.TotalSize)
             {
                 IsRunning = false;
-                //_timer.Enabled = false;
                 Console.WriteLine("Finished execution because program counter run outside of memory");
                 return;
             }
@@ -1112,7 +1111,6 @@ namespace Interpreter
         public void Stop()
         {
             IsRunning = false;
-            //_timer.Enabled = false;
         }
 
         private void _onTimerTimeout(object? source, ElapsedEventArgs e)
@@ -1125,6 +1123,9 @@ namespace Interpreter
             _currentStepCounter = 0;
         }
 
+        /// <summary>
+        /// Fully resets processor including memory and stack/program counters
+        /// </summary>
         public void ResetProcessor()
         {
             _programCounter = 0;
@@ -1135,11 +1136,21 @@ namespace Interpreter
             _currentStepCounter = 0;
         }
 
+        /// <summary>
+        /// Resets processor counters but does not touch memory
+        /// </summary>
+        public void SoftResetProcessor()
+        {
+            _programCounter = 0;
+            _registers.Reset();
+            _flags.Reset();
+            IsRunning = true;
+            _currentStepCounter = 0;
+        }
+
         public void Run()
         {
             Step();
-            //_timer.Enabled = true;
-            //_timer.AutoReset = true;
         }
     }
 }

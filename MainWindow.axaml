@@ -10,12 +10,14 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" />
-                <MenuItem Header="_Save" />
-                <MenuItem Header="Save _as" />
+                <MenuItem Header="_Open" Click="_loadFilePressed" />
+                <MenuItem Header="_Save" Click="_saveFilePressed" />
+                <MenuItem Header="Save _as" Click="_saveFilePressed" />
                 <Separator />
-                <MenuItem Header="_Load ROM" ToolTip.Tip="Load data from ROM file to memory" />
-                <MenuItem Header="_Dump ROM" ToolTip.Tip="Dump current contents of ROM into a file" />
+                <MenuItem Header="_Load ROM" ToolTip.Tip="Load data from ROM file to memory" Click="_loadRomPressed" />
+                <MenuItem Header="_Dump ROM" ToolTip.Tip="Dump current contents of ROM into a file" Click="_dumpRomPressed" />
+                <Separator />
+                <MenuItem Header="_Dump RAM" ToolTip.Tip="Dump current contents of RAM into a file for viewing in hex editors" Click="_dumpRamPressed" />
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
@@ -31,14 +33,7 @@
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
-                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
-inx h
-mov a,m
-inx h
-mov b,m
-dcx b
-hlt
-                </TextBox>
+                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200"></TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
                 <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
             </StackPanel>

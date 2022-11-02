@@ -121,6 +121,24 @@ namespace Interpreter
             rom.CopyTo(_rom, 0);
         }
 
+        public byte[] ReadRom()
+        {
+            byte[] rom = new byte[_memoryData.RomSize];
+            int totalCount = 0;
+            for (int i = 0; i < _memoryData.RomSize; i++)
+            {
+                rom[i] = _memoryDisplayGrid[i / 16][i - (i / 16) * 16];
+            }
+            return rom;
+        }
+
+        public byte[] ReadRam()
+        {
+            byte[] ram = new byte[_memoryData.RamEnd - _memoryData.RamStart];
+            Array.Copy(_memory, _memoryData.RamStart, ram, 0, _memoryData.RamEnd - _memoryData.RamStart);
+            return ram;
+        }
+
         /// <summary>
         /// Clears everything including protected ROM 
         /// </summary>

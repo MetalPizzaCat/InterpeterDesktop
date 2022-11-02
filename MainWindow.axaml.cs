@@ -94,21 +94,84 @@ namespace InterpreterDesktop
             }
         }
 
+        /// <summary>
+        /// Simply resets memory and starts execution
+        /// </summary>
         private void _runButtonPressed(object? sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
-            {
-                Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
-                _displayErrors(code.Errors);
-                if (code.Success)
-                {
-                    _interpreter.SetCode(code);
-                    _interpreter.ResetProcessor();
+            _interpreter.SoftResetProcessor();
+            Dispatcher.UIThread.Post(() => RunEmulator(), DispatcherPriority.Background);
+        }
 
-                    Dispatcher.UIThread.Post(() => RunEmulator(), DispatcherPriority.Background);
-                    //_interpreter.Run();
-                }
+        private async void _loadRomPressed(object? sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Binary files", Extensions = { "bin" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "ROM file", Extensions = { "rom" } });
+            string? file = await dialog.ShowAsync(this);
+            if (file == null)
+            {
+                return;
             }
+            byte[] rom = System.IO.File.ReadAllBytes(file);
+            _interpreter.Memory.WriteRom(rom);
+            _interpreter.ResetProcessor();
+        }
+
+        private async void _dumpRomPressed(object? sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Binary files", Extensions = { "bin", "dat" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "ROM file", Extensions = { "rom" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
+            string? file = await dialog.ShowAsync(this);
+            if (file == null)
+            {
+                return;
+            }
+            await System.IO.File.WriteAllBytesAsync(file, _interpreter.Memory.ReadRom());
+        }
+
+        private async void _dumpRamPressed(object? sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Binary files", Extensions = { "bin", "dat" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
+            string? file = await dialog.ShowAsync(this);
+            if (file == null)
+            {
+                return;
+            }
+            await System.IO.File.WriteAllBytesAsync(file, _interpreter.Memory.ReadRam());
+        }
+
+        private async void _loadFilePressed(object? sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Text files", Extensions = { "txt" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Assembly file", Extensions = { "asm", "80asm", "nema" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
+            string? file = await dialog.ShowAsync(this);
+            if (file == null)
+            {
+                return;
+            }
+            string text = System.IO.File.ReadAllText(file);
+            CodeInputBox.Text = text;
+        }
+
+        private async void _saveFilePressed(object? sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Text files", Extensions = { "txt" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Assembly file", Extensions = { "asm", "80asm", "nema" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
+            string? file = await dialog.ShowAsync(this);
+            if (file == null)
+            {
+                return;
+            }
+            System.IO.File.WriteAllText(file, CodeInputBox.Text);
         }
 
         private void _clearRomPressed(object? sender, RoutedEventArgs e)
