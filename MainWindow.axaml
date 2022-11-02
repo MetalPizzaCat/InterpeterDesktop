@@ -14,6 +14,9 @@
                 <MenuItem Header="_Save" />
                 <MenuItem Header="Save _as" />
                 <Separator />
+                <MenuItem Header="_Load ROM" ToolTip.Tip="Load data from ROM file to memory" />
+                <MenuItem Header="_Dump ROM" ToolTip.Tip="Dump current contents of ROM into a file" />
+                <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
             <MenuItem Header="_Emulation">
@@ -21,7 +24,7 @@
                 <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
                 <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
                 <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_stopButtonPressed" />
-                <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_clearRomPressed"/>
+                <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_clearRomPressed" />
             </MenuItem>
             <MenuItem Header="_Settings" Click="_onSettingsButtonPressed" />
             <MenuItem Header="_About" />
@@ -95,10 +98,10 @@ hlt
                         </StackPanel>
                     </DockPanel>
                     <DockPanel DockPanel.Dock="Right">
-                        <ItemsControl Items="{Binding Output}" >
+                        <ItemsControl Items="{Binding Output}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing = "1"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="1" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
