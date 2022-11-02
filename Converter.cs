@@ -126,7 +126,7 @@ namespace Interpreter
             Dictionary<int, string> referredJumps = new Dictionary<int, string>();
             Dictionary<int, int> referredAddresses = new Dictionary<int, int>();
             //Key is jump label, value is where to place address of the jump label
-            Dictionary<string, int> jumps = new Dictionary<string, int>();
+            Dictionary<int, string> jumps = new Dictionary<int, string>();
             int lineId = 0;
             int address = 0;
             string[] lines = code.Split("\n");
@@ -259,6 +259,9 @@ namespace Interpreter
                                 case "b":
                                     byteBase += 0x00;
                                     break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
                                 case "h":
                                     byteBase += 0x20;
                                     break;
@@ -310,6 +313,9 @@ namespace Interpreter
                                 case "b":
                                     byteBase += 0x00;
                                     break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
                                 case "h":
                                     byteBase += 0x20;
                                     break;
@@ -328,6 +334,9 @@ namespace Interpreter
                             {
                                 case "b":
                                     byteBase += 0x00;
+                                    break;
+                                case "d":
+                                    byteBase += 0x10;
                                     break;
                                 case "h":
                                     byteBase += 0x20;
@@ -363,7 +372,7 @@ namespace Interpreter
                         if (info.JumpCommands.Contains(name))
                         {
                             referredJumps.Add(lineId, matches[1].Value);
-                            jumps.Add(matches[1].Value, result.CommandBytes.Count);
+                            jumps.Add(result.CommandBytes.Count, matches[1].Value);
                             result.CommandBytes.Add(0);
                             result.CommandBytes.Add(0);
                         }
@@ -395,13 +404,13 @@ namespace Interpreter
             }
             foreach (var jump in jumps)
             {
-                if (!result.JumpDestinations.ContainsKey(jump.Key))
+                if (!result.JumpDestinations.ContainsKey(jump.Value))
                 {
                     continue;
                 }
-                ushort dest = (ushort)result.JumpDestinations[jump.Key];
-                result.CommandBytes[jump.Value] = (byte)(dest & 0xff);
-                result.CommandBytes[jump.Value + 1] = (byte)((dest & 0xff00) >> 8);
+                ushort dest = (ushort)result.JumpDestinations[jump.Value];
+                result.CommandBytes[jump.Key] = (byte)(dest & 0xff);
+                result.CommandBytes[jump.Key + 1] = (byte)((dest & 0xff00) >> 8);
             }
             result.Success = result.Errors.Count == 0;
             return result;
