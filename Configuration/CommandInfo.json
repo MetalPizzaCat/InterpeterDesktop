@@ -348,6 +348,18 @@
             ],
             "OpCode": "0"
         },
+        "inx": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "dcx": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
         "nop": {
             "OpCode": "0"
         },

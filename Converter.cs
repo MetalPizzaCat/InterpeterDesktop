@@ -302,6 +302,43 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "inx":
+                        {
+                            byte byteBase = 0x03;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                                case "sp":
+                                    byteBase += 0x30;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+
+                    case "dcx":
+                        {
+                            byte byteBase = 0x0B;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                                case "sp":
+                                    byteBase += 0x30;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
                     //Every other operation will just have it's byte written down and arguments written out 
                     default:
                         {

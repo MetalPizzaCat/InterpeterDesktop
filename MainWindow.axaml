@@ -29,9 +29,11 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
                 <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
-mvi a,18
-stc
-rar
+inx h
+mov a,m
+inx h
+mov b,m
+dcx b
 hlt
                 </TextBox>
                 <!-- List for displaying compilation, syntax, etc. errors-->
