@@ -68,16 +68,26 @@ namespace InterpreterDesktop
 
         public async Task RunEmulator()
         {
-            while (_interpreter.IsRunning)
+            try
             {
-                _interpreter.Step();
-                if (_interpreter.CurrentStepCounter >= _interpreter.StepsBeforeSleep)
+                while (_interpreter.IsRunning)
                 {
-                    await Task.Delay(1);
-                    _interpreter.ResetStepCounter();
+
+                    _interpreter.Step();
+
+                    if (_interpreter.CurrentStepCounter >= _interpreter.StepsBeforeSleep)
+                    {
+                        await Task.Delay(1);
+                        _interpreter.ResetStepCounter();
+                    }
                 }
+                System.Console.WriteLine("Exited execution");
             }
-            System.Console.WriteLine("Exited execution");
+            catch (Interpreter.ProtectedMemoryWriteException e)
+            {
+                _errors.Add($"Execution error : {e.Message}");
+                return;
+            }
         }
 
         private void _onOutPortValueChanged(int port, byte value)

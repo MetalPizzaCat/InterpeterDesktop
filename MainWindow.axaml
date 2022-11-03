@@ -33,9 +33,13 @@
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
-                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200"></TextBox>
+                <ScrollViewer MaxHeight="600">
+                    <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200"></TextBox>
+                </ScrollViewer>
                 <!-- List for displaying compilation, syntax, etc. errors-->
-                <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
+                <ScrollViewer MaxHeight="400">
+                    <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
+                </ScrollViewer>
             </StackPanel>
             <DockPanel>
                 <DockPanel DockPanel.Dock="Top">

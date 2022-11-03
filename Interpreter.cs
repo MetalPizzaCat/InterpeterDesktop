@@ -1091,6 +1091,50 @@ namespace Interpreter
                         _programCounter++;
                     }
                     break;
+                case 0x02://stax b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        _memory[value] = Registers.A;
+                    }
+                    _programCounter++;
+                    break;
+                case 0x12://stax D
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        _memory[value] = Registers.A;
+                    }
+                    _programCounter++;
+                    break;
+                case 0x0A://ldax b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        Registers.A = _memory[value];
+                    }
+                    _programCounter++;
+                    break;
+                case 0x1A://ldax d
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        Registers.A = _memory[value];
+                    }
+                    _programCounter++;
+                    break;
+                case 0x22: // shld
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        _memory[dest] = Registers.L;
+                        _memory[(ushort)(dest + 1)] = Registers.H;
+                    }
+                    _programCounter += 2;
+                    break;
+                case 0x2A: // lhld
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        Registers.L = _memory[dest];
+                        Registers.H = _memory[(ushort)(dest + 1)];
+                    }
+                    _programCounter += 2;
+                    break;
                 case 0x76://hlt
                     Stop();
                     Console.WriteLine("Finished execution");

@@ -348,6 +348,28 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "ldax":
+                        switch (matches[1].Value)
+                        {
+                            case "b":
+                                result.CommandBytes.Add(0x0A);
+                                break;
+                            case "d":
+                                result.CommandBytes.Add(0x1A);
+                                break;
+                        }
+                        break;
+                    case "stax":
+                        switch (matches[1].Value)
+                        {
+                            case "b":
+                                result.CommandBytes.Add(0x02);
+                                break;
+                            case "d":
+                                result.CommandBytes.Add(0x12);
+                                break;
+                        }
+                        break;
                     //Every other operation will just have it's byte written down and arguments written out 
                     default:
                         {
@@ -391,7 +413,7 @@ namespace Interpreter
             }
             foreach (var addresses in referredAddresses)
             {
-                if (addresses.Value <= interpreter.Memory.MemoryData.RomSize)
+                if (addresses.Value < interpreter.Memory.MemoryData.RomSize)
                 {
                     result.Errors.Add(addresses.Key, $"Illegal write address.  0000 to {(interpreter.Memory.MemoryData.RomSize).ToString("X4")} is READ only memory");
                 }
