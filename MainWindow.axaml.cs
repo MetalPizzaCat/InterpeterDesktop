@@ -51,6 +51,28 @@ namespace InterpreterDesktop
             }
         }
 
+        private string _lineCountText = string.Empty;
+        private string _codeText = string.Empty;
+
+        public string LineNumberText => _lineCountText;
+
+        public string CodeText
+        {
+            get => _codeText;
+            set
+            {
+                _codeText = value;
+                int lines = value.Split("\n").Length;
+                _lineCountText = string.Empty;
+                for (int i = 0; i < lines; i++)
+                {
+                    _lineCountText += i.ToString() + "\n";
+                }
+                LineNumberBox.Text = _lineCountText;
+            }
+        }
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -64,6 +86,17 @@ namespace InterpreterDesktop
             }
             _output = new ObservableCollection<string>(temp);
             this.DataContext = this;
+        }
+
+        private void _displayFatalError(string msg)
+        {
+            ErrorMsgBox.Text = msg;
+            ErrorMsgBox.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.DarkRed);
+        }
+        private void _displayErrors(IEnumerable<string> errors)
+        {
+            ErrorMsgBox.Text = string.Join("\n", errors);
+            ErrorMsgBox.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.White);
         }
 
         public async Task RunEmulator()
@@ -85,7 +118,7 @@ namespace InterpreterDesktop
             }
             catch (Interpreter.ProtectedMemoryWriteException e)
             {
-                _errors.Add($"Execution error : {e.Message}");
+                _displayFatalError($"Execution error : {e.Message}");
                 return;
             }
         }
@@ -95,13 +128,14 @@ namespace InterpreterDesktop
             _output[port] = _displayOutAsText ? System.Text.Encoding.ASCII.GetString(new[] { value }) : value.ToString("X2");
         }
 
-        private void _displayErrors(Dictionary<int, string> errors)
+        private void _recordErrors(Dictionary<int, string> errors)
         {
             _errors.Clear();
             foreach (KeyValuePair<int, string> error in errors)
             {
                 _errors.Add($"Line: {error.Key}. Error: {error.Value}");
             }
+            _displayErrors(_errors);
         }
 
         /// <summary>
@@ -205,7 +239,7 @@ namespace InterpreterDesktop
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
                 Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
-                _displayErrors(code.Errors);
+                _recordErrors(code.Errors);
                 _interpreter.SetCode(code);
                 _interpreter.ResetProcessor();
             }

@@ -3,8 +3,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignWidth="400"
-    d:DesignHeight="450"
+    Width="1400"
+    Height="750"
+    MinWidth="1300"
+    MinHeight="700"
     x:Class="InterpreterDesktop.MainWindow"
     Title="NEMA-8">
     <DockPanel>
@@ -32,13 +34,29 @@
             <MenuItem Header="_About" />
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-            <StackPanel>
-                <ScrollViewer MaxHeight="600">
-                    <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200"></TextBox>
-                </ScrollViewer>
+            <StackPanel MaxWidth="500">
+                <Border BorderBrush="LightGray" BorderThickness="2">
+                    <ScrollViewer MaxHeight="600">
+                        <DockPanel>
+                            <TextBlock x:Name="LineNumberBox"
+                                DockPanel.Dock="Left"
+                                HorizontalAlignment="Left"
+                                Margin="2 6 2 2"
+                                Text="{Binding LineNumberText}"
+                                MinWidth="10" />
+                            <TextBox DockPanel.Dock="Right"
+                                Name="CodeInputBox"
+                                TextWrapping="Wrap"
+                                AcceptsReturn="True"
+                                MinHeight="450"
+                                MinWidth="200"
+                                Text="{Binding CodeText}" />
+                        </DockPanel>
+                    </ScrollViewer>
+                </Border>
                 <!-- List for displaying compilation, syntax, etc. errors-->
-                <ScrollViewer MaxHeight="400">
-                    <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
+                <ScrollViewer Height="100" MaxHeight="100" Margin="5" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+                    <TextBlock x:Name="ErrorMsgBox" />
                 </ScrollViewer>
             </StackPanel>
             <DockPanel>
@@ -47,54 +65,54 @@
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">
                             <StackPanel>
                                 <TextBlock>A</TextBlock>
-                                <TextBlock Text="{Binding Registers.A ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.A ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>B</TextBlock>
-                                <TextBlock Text="{Binding Registers.B ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.B ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>C</TextBlock>
-                                <TextBlock Text="{Binding Registers.C ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.C ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>D</TextBlock>
-                                <TextBlock Text="{Binding Registers.D ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.D ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>E</TextBlock>
-                                <TextBlock Text="{Binding Registers.E ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.E ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>H</TextBlock>
-                                <TextBlock Text="{Binding Registers.H ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.H ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>L</TextBlock>
-                                <TextBlock Text="{Binding Registers.L ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.L ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
 
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">
                             <StackPanel>
                                 <TextBlock>S</TextBlock>
-                                <TextBlock Text="{Binding Flags.S ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.S ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>Z</TextBlock>
-                                <TextBlock Text="{Binding Flags.Z ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.Z ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>Ac</TextBlock>
-                                <TextBlock Text="{Binding Flags.Ac ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.Ac ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>P</TextBlock>
-                                <TextBlock Text="{Binding Flags.P ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.P ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>C</TextBlock>
-                                <TextBlock Text="{Binding Flags.C ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.C ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
