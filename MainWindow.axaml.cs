@@ -85,6 +85,7 @@ namespace InterpreterDesktop
                 temp.Add(b.ToString("X2"));
             }
             _output = new ObservableCollection<string>(temp);
+            InputTable.OnPortValueChanged += _onInValueChanged;
             this.DataContext = this;
         }
 
@@ -243,6 +244,11 @@ namespace InterpreterDesktop
                 _interpreter.SetCode(code);
                 _interpreter.ResetProcessor();
             }
+        }
+
+        private void _onInValueChanged(int port, byte value)
+        {
+            _interpreter.SetIn(port, value);
         }
 
         private void _stepButtonPressed(object? sender, RoutedEventArgs e)

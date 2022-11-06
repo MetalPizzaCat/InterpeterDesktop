@@ -4,5 +4,25 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
   x:Class="InterpreterDesktop.InputPorts">
-  <DataGrid Name="PortGrid"></DataGrid>
+  <DataGrid Name="PortGrid">
+    <DataGrid.Columns>
+      <DataGridTextColumn Header="Input" IsReadOnly="True" />
+      <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />
+      <DataGridTextColumn Header="1" Binding="{ Binding X1 }" />
+      <DataGridTextColumn Header="2" Binding="{ Binding X2 }" />
+      <DataGridTextColumn Header="3" Binding="{ Binding X3 }" />
+      <DataGridTextColumn Header="4" Binding="{ Binding X4 }" />
+      <DataGridTextColumn Header="5" Binding="{ Binding X5 }" />
+      <DataGridTextColumn Header="6" Binding="{ Binding X6 }" />
+      <DataGridTextColumn Header="7" Binding="{ Binding X7 }" />
+      <DataGridTextColumn Header="8" Binding="{ Binding X8 }" />
+      <DataGridTextColumn Header="9" Binding="{ Binding X9 }" />
+      <DataGridTextColumn Header="A" Binding="{ Binding XA }" />
+      <DataGridTextColumn Header="B" Binding="{ Binding XB }" />
+      <DataGridTextColumn Header="C" Binding="{ Binding XC }" />
+      <DataGridTextColumn Header="D" Binding="{ Binding XD }" />
+      <DataGridTextColumn Header="E" Binding="{ Binding XE }" />
+      <DataGridTextColumn Header="F" Binding="{ Binding XF }" />
+  </DataGrid.Columns>
+  </DataGrid>
 </UserControl>

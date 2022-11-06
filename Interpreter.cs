@@ -42,6 +42,7 @@ namespace Interpreter
         public Memory Memory { get => _memory; set => _memory = value; }
 
         private byte[] _outputPorts = new byte[16];
+        private byte[] _inputPorts = new byte[16];
 
         public byte[] OutputPorts => _outputPorts;
 
@@ -237,6 +238,11 @@ namespace Interpreter
             _memory.OnOutPortValueChanged += _onOutPortValueChanged;
         }
 
+        /// <summary>
+        /// Set value of the object that mimics out port
+        /// </summary>
+        /// <param name="port">Port id</param>
+        /// <param name="value"></param>
         public void SetOut(int port, byte value)
         {
             //because ports are meant to be dynamic this technically does write to that port
@@ -248,6 +254,21 @@ namespace Interpreter
             }
             _outputPorts[port] = value;
             OnOutPortValueChanged?.Invoke(port, value);
+        }
+
+        /// <summary>
+        /// Set value of the object that mimics in port
+        /// </summary>
+        /// <param name="port">Port id</param>
+        /// <param name="value"></param>
+        public void SetIn(int port, byte value)
+        {
+            if (port >= _inputPorts.Length || port < 0)
+            {
+                return;
+            }
+            _memory[(ushort)(port + _memory.MemoryData.InOutPortsStartLocation)] = value;
+            _inputPorts[port] = value;
         }
 
         public void JumpTo(string destination)
@@ -1004,7 +1025,8 @@ namespace Interpreter
                     _programCounter++;
                     break;
                 case 0xdb://in
-                    throw new NotImplementedException("IN is not implemented");
+                    Registers.A = _inputPorts[_memory[(ushort)(ProgramCounter + 1)]];
+                    _programCounter++;
                     break;
                 case 0xd3: // out
                     SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);

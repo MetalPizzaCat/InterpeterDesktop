@@ -128,10 +128,10 @@
                         <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
-                    <emul:InputPorts DockPanel.Dock = "Right"/>
                 </DockPanel>
+                <emul:InputPorts DockPanel.Dock="Top" Name="InputTable" />
                 <!-- Using data grid to dispaly memory cells-->
-                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
+                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top"  CanUserSortColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
                         <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />

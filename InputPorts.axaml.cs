@@ -12,19 +12,20 @@ namespace InterpreterDesktop
         public delegate void PortValueChangedEventHandler(int port, byte value);
         public event PortValueChangedEventHandler? OnPortValueChanged;
         public static readonly int PortCount = 16;
-        public ObservableCollection<byte> Ports { get; } = new ObservableCollection<byte>();
+        public ObservableCollection<MemoryGridRow> Ports { get; } = new ObservableCollection<MemoryGridRow>();
 
         public InputPorts()
         {
             InitializeComponent();
-            for (int i = 0; i < PortCount; i++)
-            {
-                PortGrid.Columns.Add(new DataGridTextColumn() { Header = $"P{i}", Binding = new Binding($"[{i}]"), Width = DataGridLength.SizeToHeader });
-                Ports.Add((byte)i);
-            }
-            PortGrid.AutoGenerateColumns = false;
+            Ports.Add(new MemoryGridRow(0));
+            Ports[0].OnRowValueChanged += _inputChanged;
             PortGrid.Items = Ports;
             this.DataContext = this;
+        }
+
+        private void _inputChanged(int port, byte value)
+        {
+            OnPortValueChanged?.Invoke(port, value);
         }
     }
 }
