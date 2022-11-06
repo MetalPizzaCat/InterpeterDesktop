@@ -640,20 +640,40 @@ namespace Interpreter
                     ProgramCounter += 2;
                     break;
                 case 0xc6://adi
-                    Registers.A += _memory[(ushort)(ProgramCounter + 1)];
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A + _memory[(ushort)(ProgramCounter + 1)]);
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xce://aci
-                    Registers.A += (byte)(_memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A + _memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xd6://sui
-                    Registers.A -= _memory[(ushort)(ProgramCounter + 1)];
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A - _memory[(ushort)(ProgramCounter + 1)]);
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xde://sbi
-                    Registers.A -= (byte)(_memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A - _memory[(ushort)(ProgramCounter + 1)] - (Flags.C ? 1 : 0));
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xc3://jump
                     _jmp();
@@ -1114,6 +1134,47 @@ namespace Interpreter
                         _programCounter++;
                     }
                     break;
+
+                case 0x09: // dad b
+                    {
+                        ushort value1 = (ushort)(Registers.C | Registers.B << 8);
+                        ushort value2 = (ushort)(Registers.L | Registers.H << 8);
+                        ushort value = (ushort)(value1 + value2);
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x19: // dad d
+                    {
+                        ushort value1 = (ushort)(Registers.E | Registers.D << 8);
+                        ushort value2 = (ushort)(Registers.L | Registers.H << 8);
+                        ushort value = (ushort)(value1 + value2);
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x29: // dad h
+                    {
+                        ushort value = (ushort)(2 * (Registers.L | Registers.H << 8));
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x39: // dad sp
+                    {
+                        ushort value = (ushort)(_memory.StackPointer + (Registers.L | Registers.H << 8));
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                    }
+                    break;
                 case 0x02://stax b
                     {
                         ushort value = (ushort)(Registers.C | Registers.B << 8);
@@ -1157,6 +1218,19 @@ namespace Interpreter
                         Registers.H = _memory[(ushort)(dest + 1)];
                     }
                     _programCounter += 3;
+                    break;
+                case 0xe3://xthl
+                    Registers.L = _memory[(ushort)(_memory.StackPointer + 1)];
+                    Registers.H = _memory[(ushort)(_memory.StackPointer + 2)];
+                    _programCounter++;
+                    break;
+                case 0xe9://pchl
+                    ProgramCounter = (Registers.L | Registers.H << 8);
+                    _programCounter++;
+                    break;
+                case 0xf9://sphl
+                    _memory.StackPointer = (ushort)(Registers.L | Registers.H << 8);
+                    _programCounter++;
                     break;
                 case 0x76://hlt
                     Stop();

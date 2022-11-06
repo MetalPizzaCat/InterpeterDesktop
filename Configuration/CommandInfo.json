@@ -384,6 +384,21 @@
             ],
             "OpCode": "2a"
         },
+        "dad": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "xthl": {
+            "OpCode": "e3"
+        },
+        "pchl": {
+            "OpCode": "e9"
+        },
+        "sphl": {
+            "OpCode": "f9"
+        },
         "nop": {
             "OpCode": "0"
         },

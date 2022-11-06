@@ -31,7 +31,6 @@
                 <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_stopButtonPressed" />
                 <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_clearRomPressed" />
             </MenuItem>
-            <MenuItem Header="_Settings" Click="_onSettingsButtonPressed" />
             <MenuItem Header="_About" />
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -129,7 +128,9 @@
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
                 </DockPanel>
+                <TextBlock DockPanel.Dock="Top" >Input</TextBlock>
                 <emul:InputPorts DockPanel.Dock="Top" Name="InputTable" />
+                <TextBlock DockPanel.Dock="Top" >Memory</TextBlock>
                 <!-- Using data grid to dispaly memory cells-->
                 <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top"  CanUserSortColumns="False">
                     <DataGrid.Columns>
