@@ -47,7 +47,23 @@ namespace Interpreter
         /// </summary>
         public int StackPointerLocation;
 
-        public MemorySegmentationData(int totalSize, int ramStart, int ramEnd, int romSize, int stackAddress, int stackLength, int offset, int stackPointerLocation)
+        /// <summary>
+        /// Location of where in out ports starts. Must account for at least 32 bytes. With first 16 being read only<para/>
+        /// Unlike in the original processor OUT doesn't use duplicated bytes system,<para/>
+        /// but rather has it's own row in the RAM. This row can be written to but not read from
+        /// </summary>
+        public int InOutPortsStartLocation;
+
+        public MemorySegmentationData(int totalSize,
+                                        int ramStart,
+                                        int ramEnd,
+                                        int romSize,
+                                        int stackAddress,
+                                        int stackLength,
+                                        int offset,
+                                        int stackPointerLocation,
+                                        int inOutPortsStartLocation
+        )
         {
             TotalSize = totalSize;
             RamStart = ramStart;
@@ -57,6 +73,7 @@ namespace Interpreter
             StackLength = stackLength;
             Offset = offset;
             StackPointerLocation = stackPointerLocation;
+            InOutPortsStartLocation = inOutPortsStartLocation;
         }
     }
 
@@ -75,6 +92,10 @@ namespace Interpreter
     /// </summary>
     public class Memory : IProcessorComponent
     {
+
+        public delegate void OutPortValueChangedEventHandler(int port, byte value);
+        public event OutPortValueChangedEventHandler? OnOutPortValueChanged;
+
         /// <summary>
         /// Data grid friendly version of the memory data representation
         /// </summary>
@@ -229,6 +250,10 @@ namespace Interpreter
                 {
                     throw new ProtectedMemoryWriteException($"Attempted to write at {(i).ToString("X4")}. But 0000 to {(_memoryData.RomSize).ToString("X4")} is reserved memory");
                 }
+                if ((i & 0xFFF0) == ((_memoryData.InOutPortsStartLocation + 0x10) & 0xFFF0))
+                {
+                    OnOutPortValueChanged?.Invoke(i & 0x000F, value);
+                }
                 int ind = i - (i / 16) * 16;
                 _memoryDisplayGrid[i / 16][i - (i / 16) * 16] = value;
                 _memory[i] = value;
@@ -245,10 +270,10 @@ namespace Interpreter
         /// <param name="stackAddress">Where does stack begin</param>
         /// <param name="stackLength">How big is the start</param>
         /// <param name="offset">This will dictate where will the program start, must be less then romSize</param>
-        public Memory(int totalSize = ushort.MaxValue, int ramStart = 0x0000, int ramEnd = 0xeff0, int romSize = 0x5000, int stackAddress = 0xFFFF, int stackLength = 0x0fff, int offset = 0x0000, int stackPointerLocation = 0xeff0)
+        public Memory(int totalSize = ushort.MaxValue, int ramStart = 0x5000, int ramEnd = 0xefd0, int romSize = 0x5000, int stackAddress = 0xFFFF, int stackLength = 0x0fff, int offset = 0x0000, int stackPointerLocation = 0xeff0)
         {
 
-            _memoryData = new MemorySegmentationData(totalSize, ramStart, ramEnd, romSize, stackAddress, stackLength, offset, stackPointerLocation);
+            _memoryData = new MemorySegmentationData(totalSize, ramStart, ramEnd, romSize, stackAddress, stackLength, offset, stackPointerLocation, ramEnd);
             _memoryDisplayGrid.CollectionChanged += _onCollectionChanged;
             _memory = new byte[totalSize + 1];
             for (int i = 0; i < totalSize; i += 0x10)

@@ -234,6 +234,7 @@ namespace Interpreter
             _timer = new Timer(100);
             _timer.Enabled = false;
             _timer.Elapsed += _onTimerTimeout;
+            _memory.OnOutPortValueChanged += _onOutPortValueChanged;
         }
 
         public void SetOut(int port, byte value)
@@ -1125,7 +1126,7 @@ namespace Interpreter
                         _memory[dest] = Registers.L;
                         _memory[(ushort)(dest + 1)] = Registers.H;
                     }
-                    _programCounter += 2;
+                    _programCounter += 3;
                     break;
                 case 0x2A: // lhld
                     {
@@ -1133,7 +1134,7 @@ namespace Interpreter
                         Registers.L = _memory[dest];
                         Registers.H = _memory[(ushort)(dest + 1)];
                     }
-                    _programCounter += 2;
+                    _programCounter += 3;
                     break;
                 case 0x76://hlt
                     Stop();
@@ -1165,6 +1166,10 @@ namespace Interpreter
             IsRunning = false;
         }
 
+        private void _onOutPortValueChanged(int port, byte value)
+        {
+            SetOut(port, value);
+        }
         private void _onTimerTimeout(object? source, ElapsedEventArgs e)
         {
             // Step();
