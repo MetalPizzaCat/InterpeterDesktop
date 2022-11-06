@@ -51,7 +51,7 @@ namespace Interpreter
 
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex OperationSeparator = new Regex(@"([a-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex OperationSeparator = new Regex(@"([A-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Interpreter
             Dictionary<int, string> referredJumps = new Dictionary<int, string>();
             Dictionary<int, int> referredAddresses = new Dictionary<int, int>();
             //Key is jump label, value is where to place address of the jump label
-            Dictionary<string, int> jumps = new Dictionary<string, int>();
+            Dictionary<int, string> jumps = new Dictionary<int, string>();
             int lineId = 0;
             int address = 0;
             string[] lines = code.Split("\n");
@@ -259,6 +259,9 @@ namespace Interpreter
                                 case "b":
                                     byteBase += 0x00;
                                     break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
                                 case "h":
                                     byteBase += 0x20;
                                     break;
@@ -302,6 +305,71 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "inx":
+                        {
+                            byte byteBase = 0x03;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                                case "sp":
+                                    byteBase += 0x30;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+
+                    case "dcx":
+                        {
+                            byte byteBase = 0x0B;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                                case "sp":
+                                    byteBase += 0x30;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
+                    case "ldax":
+                        switch (matches[1].Value)
+                        {
+                            case "b":
+                                result.CommandBytes.Add(0x0A);
+                                break;
+                            case "d":
+                                result.CommandBytes.Add(0x1A);
+                                break;
+                        }
+                        break;
+                    case "stax":
+                        switch (matches[1].Value)
+                        {
+                            case "b":
+                                result.CommandBytes.Add(0x02);
+                                break;
+                            case "d":
+                                result.CommandBytes.Add(0x12);
+                                break;
+                        }
+                        break;
                     //Every other operation will just have it's byte written down and arguments written out 
                     default:
                         {
@@ -326,7 +394,7 @@ namespace Interpreter
                         if (info.JumpCommands.Contains(name))
                         {
                             referredJumps.Add(lineId, matches[1].Value);
-                            jumps.Add(matches[1].Value, result.CommandBytes.Count);
+                            jumps.Add(result.CommandBytes.Count, matches[1].Value);
                             result.CommandBytes.Add(0);
                             result.CommandBytes.Add(0);
                         }
@@ -345,7 +413,7 @@ namespace Interpreter
             }
             foreach (var addresses in referredAddresses)
             {
-                if (addresses.Value <= interpreter.Memory.MemoryData.RomSize)
+                if (addresses.Value < interpreter.Memory.MemoryData.RomSize)
                 {
                     result.Errors.Add(addresses.Key, $"Illegal write address.  0000 to {(interpreter.Memory.MemoryData.RomSize).ToString("X4")} is READ only memory");
                 }
@@ -358,13 +426,13 @@ namespace Interpreter
             }
             foreach (var jump in jumps)
             {
-                if (!result.JumpDestinations.ContainsKey(jump.Key))
+                if (!result.JumpDestinations.ContainsKey(jump.Value))
                 {
                     continue;
                 }
-                ushort dest = (ushort)result.JumpDestinations[jump.Key];
-                result.CommandBytes[jump.Value] = (byte)(dest & 0xff);
-                result.CommandBytes[jump.Value + 1] = (byte)((dest & 0xff00) >> 8);
+                ushort dest = (ushort)result.JumpDestinations[jump.Value];
+                result.CommandBytes[jump.Key] = (byte)(dest & 0xff);
+                result.CommandBytes[jump.Key + 1] = (byte)((dest & 0xff00) >> 8);
             }
             result.Success = result.Errors.Count == 0;
             return result;

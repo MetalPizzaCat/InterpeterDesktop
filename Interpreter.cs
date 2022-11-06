@@ -143,7 +143,6 @@ namespace Interpreter
         public void SetCode(ProcessedCodeInfo code)
         {
             _jumpDestinations = code.JumpDestinations;
-            _memory.ProtectedMemoryLength = code.Length;
             _memory.WriteRom(code.CommandBytes.ToArray());
         }
 
@@ -766,6 +765,13 @@ namespace Interpreter
                         ProgramCounter += 3;
                     }
                     break;
+                case 0x11://lxi d
+                    {
+                        Registers.E = _memory[(ushort)(ProgramCounter + 1)];
+                        Registers.D = _memory[(ushort)(ProgramCounter + 2)];
+                        ProgramCounter += 3;
+                    }
+                    break;
                 case 0x21://lxi h
                     {
                         Registers.L = _memory[(ushort)(ProgramCounter + 1)];
@@ -1001,6 +1007,7 @@ namespace Interpreter
                     break;
                 case 0xd3: // out
                     SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
+                    _programCounter++;
                     break;
                 case 0x2f://cma
                     Registers.A = (byte)(~Registers.A);
@@ -1013,6 +1020,120 @@ namespace Interpreter
                 case 0xEB: //xchg
                     (Registers.H, Registers.L, Registers.D, Registers.E) = (Registers.D, Registers.E, Registers.H, Registers.L);
                     ProgramCounter++;
+                    break;
+                case 0x03: // inx b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        value++;
+                        Registers.B = (byte)((value & 0xFF00) >> 8);
+                        Registers.C = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x13: // inx d
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        value++;
+                        Registers.D = (byte)((value & 0xFF00) >> 8);
+                        Registers.E = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x23: // inx h
+                    {
+                        ushort value = (ushort)(Registers.L | Registers.H << 8);
+                        value++;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x33: // inx sp
+                    {
+                        _memory.StackPointer++;
+                        _programCounter++;
+                    }
+                    break;
+                case 0x0b: // dcx b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        value--;
+                        Registers.B = (byte)((value & 0xFF00) >> 8);
+                        Registers.C = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x1b: // dcx d
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        value--;
+                        Registers.D = (byte)((value & 0xFF00) >> 8);
+                        Registers.E = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x2b: // dcx h
+                    {
+                        ushort value = (ushort)(Registers.L | Registers.H << 8);
+                        value--;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                    break;
+                case 0x3b: // dcx sp
+                    {
+                        _memory.StackPointer--;
+                        _programCounter++;
+                    }
+                    break;
+                case 0x02://stax b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        _memory[value] = Registers.A;
+                    }
+                    _programCounter++;
+                    break;
+                case 0x12://stax D
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        _memory[value] = Registers.A;
+                    }
+                    _programCounter++;
+                    break;
+                case 0x0A://ldax b
+                    {
+                        ushort value = (ushort)(Registers.C | Registers.B << 8);
+                        Registers.A = _memory[value];
+                    }
+                    _programCounter++;
+                    break;
+                case 0x1A://ldax d
+                    {
+                        ushort value = (ushort)(Registers.E | Registers.D << 8);
+                        Registers.A = _memory[value];
+                    }
+                    _programCounter++;
+                    break;
+                case 0x22: // shld
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        _memory[dest] = Registers.L;
+                        _memory[(ushort)(dest + 1)] = Registers.H;
+                    }
+                    _programCounter += 2;
+                    break;
+                case 0x2A: // lhld
+                    {
+                        ushort dest = (ushort)(_memory[(ushort)(ProgramCounter + 1)] | _memory[(ushort)(ProgramCounter + 2)] << 8);
+                        Registers.L = _memory[dest];
+                        Registers.H = _memory[(ushort)(dest + 1)];
+                    }
+                    _programCounter += 2;
                     break;
                 case 0x76://hlt
                     Stop();
@@ -1034,7 +1155,6 @@ namespace Interpreter
             if (ProgramCounter >= _memory.MemoryData.TotalSize)
             {
                 IsRunning = false;
-                //_timer.Enabled = false;
                 Console.WriteLine("Finished execution because program counter run outside of memory");
                 return;
             }
@@ -1043,7 +1163,6 @@ namespace Interpreter
         public void Stop()
         {
             IsRunning = false;
-            //_timer.Enabled = false;
         }
 
         private void _onTimerTimeout(object? source, ElapsedEventArgs e)
@@ -1056,6 +1175,9 @@ namespace Interpreter
             _currentStepCounter = 0;
         }
 
+        /// <summary>
+        /// Fully resets processor including memory and stack/program counters
+        /// </summary>
         public void ResetProcessor()
         {
             _programCounter = 0;
@@ -1066,11 +1188,21 @@ namespace Interpreter
             _currentStepCounter = 0;
         }
 
+        /// <summary>
+        /// Resets processor counters but does not touch memory
+        /// </summary>
+        public void SoftResetProcessor()
+        {
+            _programCounter = 0;
+            _registers.Reset();
+            _flags.Reset();
+            IsRunning = true;
+            _currentStepCounter = 0;
+        }
+
         public void Run()
         {
             Step();
-            //_timer.Enabled = true;
-            //_timer.AutoReset = true;
         }
     }
 }

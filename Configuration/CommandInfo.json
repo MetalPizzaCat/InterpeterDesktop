@@ -47,7 +47,7 @@
             "Arguments": [
                 2
             ],
-            "OpCode": "3as"
+            "OpCode": "3a"
         },
         "add": {
             "Arguments": [
@@ -347,6 +347,42 @@
                 0
             ],
             "OpCode": "0"
+        },
+        "inx": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "dcx": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "stax": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "ldax": {
+            "Arguments": [
+                0
+            ],
+            "OpCode": "0"
+        },
+        "shld": {
+            "Arguments": [
+                2
+            ],
+            "OpCode": "22"
+        },
+        "lhld": {
+            "Arguments": [
+                2
+            ],
+            "OpCode": "2a"
         },
         "nop": {
             "OpCode": "0"

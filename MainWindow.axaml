@@ -3,16 +3,23 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignWidth="400"
-    d:DesignHeight="450"
+    Width="1400"
+    Height="750"
+    MinWidth="1300"
+    MinHeight="700"
     x:Class="InterpreterDesktop.MainWindow"
     Title="NEMA-8">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" />
-                <MenuItem Header="_Sai jusve" />
-                <MenuItem Header="Save _as" />
+                <MenuItem Header="_Open" Click="_loadFilePressed" />
+                <MenuItem Header="_Save" Click="_saveFilePressed" />
+                <MenuItem Header="Save _as" Click="_saveFilePressed" />
+                <Separator />
+                <MenuItem Header="_Load ROM" ToolTip.Tip="Load data from ROM file to memory" Click="_loadRomPressed" />
+                <MenuItem Header="_Dump ROM" ToolTip.Tip="Dump current contents of ROM into a file" Click="_dumpRomPressed" />
+                <Separator />
+                <MenuItem Header="_Dump RAM" ToolTip.Tip="Dump current contents of RAM into a file for viewing in hex editors" Click="_dumpRamPressed" />
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
@@ -21,20 +28,36 @@
                 <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
                 <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
                 <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_stopButtonPressed" />
+                <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_clearRomPressed" />
             </MenuItem>
             <MenuItem Header="_Settings" Click="_onSettingsButtonPressed" />
             <MenuItem Header="_About" />
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-            <StackPanel>
-                <TextBox Name="CodeInputBox" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="450" MinWidth="200">
-mvi a,18
-stc
-rar
-hlt
-                </TextBox>
+            <StackPanel MaxWidth="500">
+                <Border BorderBrush="LightGray" BorderThickness="2">
+                    <ScrollViewer MaxHeight="600">
+                        <DockPanel>
+                            <TextBlock x:Name="LineNumberBox"
+                                DockPanel.Dock="Left"
+                                HorizontalAlignment="Left"
+                                Margin="2 6 2 2"
+                                Text="{Binding LineNumberText}"
+                                MinWidth="10" />
+                            <TextBox DockPanel.Dock="Right"
+                                Name="CodeInputBox"
+                                TextWrapping="Wrap"
+                                AcceptsReturn="True"
+                                MinHeight="450"
+                                MinWidth="200"
+                                Text="{Binding CodeText}" />
+                        </DockPanel>
+                    </ScrollViewer>
+                </Border>
                 <!-- List for displaying compilation, syntax, etc. errors-->
-                <ListBox Name="ErrorMsgBox" Items="{Binding Errors}"></ListBox>
+                <ScrollViewer Height="100" MaxHeight="100" Margin="5" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+                    <TextBlock x:Name="ErrorMsgBox" />
+                </ScrollViewer>
             </StackPanel>
             <DockPanel>
                 <DockPanel DockPanel.Dock="Top">
@@ -42,94 +65,65 @@ hlt
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">
                             <StackPanel>
                                 <TextBlock>A</TextBlock>
-                                <TextBlock Text="{Binding Registers.A ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.A ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>B</TextBlock>
-                                <TextBlock Text="{Binding Registers.B ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.B ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>C</TextBlock>
-                                <TextBlock Text="{Binding Registers.C ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.C ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>D</TextBlock>
-                                <TextBlock Text="{Binding Registers.D ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.D ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>E</TextBlock>
-                                <TextBlock Text="{Binding Registers.E ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.E ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>H</TextBlock>
-                                <TextBlock Text="{Binding Registers.H ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.H ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>L</TextBlock>
-                                <TextBlock Text="{Binding Registers.L ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Registers.L ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
 
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Spacing="5">
                             <StackPanel>
                                 <TextBlock>S</TextBlock>
-                                <TextBlock Text="{Binding Flags.S ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.S ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>Z</TextBlock>
-                                <TextBlock Text="{Binding Flags.Z ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.Z ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>Ac</TextBlock>
-                                <TextBlock Text="{Binding Flags.Ac ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.Ac ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>P</TextBlock>
-                                <TextBlock Text="{Binding Flags.P ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.P ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock>C</TextBlock>
-                                <TextBlock Text="{Binding Flags.C ,StringFormat={}{0:X2}}"></TextBlock>
+                                <TextBlock Text="{Binding Flags.C ,StringFormat= {}{0:X2}}"></TextBlock>
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
                     <DockPanel DockPanel.Dock="Right">
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="2">
-                            <TextBlock> 0</TextBlock>
-                            <TextBlock> 1</TextBlock>
-                            <TextBlock> 2</TextBlock>
-                            <TextBlock> 3</TextBlock>
-                            <TextBlock> 4</TextBlock>
-                            <TextBlock> 5</TextBlock>
-                            <TextBlock> 6</TextBlock>
-                            <TextBlock> 7</TextBlock>
-                            <TextBlock> 8</TextBlock>
-                            <TextBlock> 9</TextBlock>
-                            <TextBlock> A</TextBlock>
-                            <TextBlock> B</TextBlock>
-                            <TextBlock> C</TextBlock>
-                            <TextBlock> D</TextBlock>
-                            <TextBlock> E</TextBlock>
-                            <TextBlock> F</TextBlock>
-                        </StackPanel>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="2">
-                            <TextBlock Text="{Binding Output[0] }" />
-                            <TextBlock Text="{Binding Output[1] }" />
-                            <TextBlock Text="{Binding Output[2] }" />
-                            <TextBlock Text="{Binding Output[3] }" />
-                            <TextBlock Text="{Binding Output[4] }" />
-                            <TextBlock Text="{Binding Output[5] }" />
-                            <TextBlock Text="{Binding Output[6] }" />
-                            <TextBlock Text="{Binding Output[7] }" />
-                            <TextBlock Text="{Binding Output[8] }" />
-                            <TextBlock Text="{Binding Output[9] }" />
-                            <TextBlock Text="{Binding Output[10]}" />
-                            <TextBlock Text="{Binding Output[11]}" />
-                            <TextBlock Text="{Binding Output[12]}" />
-                            <TextBlock Text="{Binding Output[13]}" />
-                            <TextBlock Text="{Binding Output[14]}" />
-                            <TextBlock Text="{Binding Output[15]}" />
-                        </StackPanel>
+                        <ItemsControl Items="{Binding Output}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
                         <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
