@@ -2,6 +2,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:emul="clr-namespace:InterpreterDesktop"
     mc:Ignorable="d"
     Width="1400"
     Height="750"
@@ -127,6 +128,7 @@
                         <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
+                    <emul:InputPorts DockPanel.Dock = "Right"/>
                 </DockPanel>
                 <!-- Using data grid to dispaly memory cells-->
                 <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
