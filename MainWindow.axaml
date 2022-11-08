@@ -45,6 +45,7 @@
                                 Text="{Binding LineNumberText}"
                                 MinWidth="10" />
                             <TextBox DockPanel.Dock="Right"
+                                Tab
                                 Name="CodeInputBox"
                                 TextWrapping="Wrap"
                                 AcceptsReturn="True"
