@@ -348,6 +348,27 @@ namespace Interpreter
                             result.CommandBytes.Add(byteBase);
                         }
                         break;
+                    case "dad":
+                        {
+                            byte byteBase = 0x09;
+                            switch (matches[1].Value)
+                            {
+                                case "b":
+                                    byteBase += 0x00;
+                                    break;
+                                case "d":
+                                    byteBase += 0x10;
+                                    break;
+                                case "h":
+                                    byteBase += 0x20;
+                                    break;
+                                case "sp":
+                                    byteBase += 0x30;
+                                    break;
+                            }
+                            result.CommandBytes.Add(byteBase);
+                        }
+                        break;
                     case "ldax":
                         switch (matches[1].Value)
                         {

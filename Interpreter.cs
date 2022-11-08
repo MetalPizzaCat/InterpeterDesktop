@@ -42,6 +42,7 @@ namespace Interpreter
         public Memory Memory { get => _memory; set => _memory = value; }
 
         private byte[] _outputPorts = new byte[16];
+        private byte[] _inputPorts = new byte[16];
 
         public byte[] OutputPorts => _outputPorts;
 
@@ -237,6 +238,11 @@ namespace Interpreter
             _memory.OnOutPortValueChanged += _onOutPortValueChanged;
         }
 
+        /// <summary>
+        /// Set value of the object that mimics out port
+        /// </summary>
+        /// <param name="port">Port id</param>
+        /// <param name="value"></param>
         public void SetOut(int port, byte value)
         {
             //because ports are meant to be dynamic this technically does write to that port
@@ -248,6 +254,21 @@ namespace Interpreter
             }
             _outputPorts[port] = value;
             OnOutPortValueChanged?.Invoke(port, value);
+        }
+
+        /// <summary>
+        /// Set value of the object that mimics in port
+        /// </summary>
+        /// <param name="port">Port id</param>
+        /// <param name="value"></param>
+        public void SetIn(int port, byte value)
+        {
+            if (port >= _inputPorts.Length || port < 0)
+            {
+                return;
+            }
+            _memory[(ushort)(port + _memory.MemoryData.InOutPortsStartLocation)] = value;
+            _inputPorts[port] = value;
         }
 
         public void JumpTo(string destination)
@@ -619,20 +640,40 @@ namespace Interpreter
                     ProgramCounter += 2;
                     break;
                 case 0xc6://adi
-                    Registers.A += _memory[(ushort)(ProgramCounter + 1)];
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A + _memory[(ushort)(ProgramCounter + 1)]);
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xce://aci
-                    Registers.A += (byte)(_memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A + _memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xd6://sui
-                    Registers.A -= _memory[(ushort)(ProgramCounter + 1)];
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A - _memory[(ushort)(ProgramCounter + 1)]);
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xde://sbi
-                    Registers.A -= (byte)(_memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
-                    ProgramCounter += 2;
+                    {
+                        ushort result = (ushort)(Registers.A - _memory[(ushort)(ProgramCounter + 1)] - (Flags.C ? 1 : 0));
+                        Registers.A = (byte)result;
+                        ProgramCounter++;
+                        CheckFlags(result);
+                        ProgramCounter += 2;
+                    }
                     break;
                 case 0xc3://jump
                     _jmp();
@@ -1004,7 +1045,8 @@ namespace Interpreter
                     _programCounter++;
                     break;
                 case 0xdb://in
-                    throw new NotImplementedException("IN is not implemented");
+                    Registers.A = _inputPorts[_memory[(ushort)(ProgramCounter + 1)]];
+                    _programCounter++;
                     break;
                 case 0xd3: // out
                     SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
@@ -1092,6 +1134,47 @@ namespace Interpreter
                         _programCounter++;
                     }
                     break;
+
+                case 0x09: // dad b
+                    {
+                        ushort value1 = (ushort)(Registers.C | Registers.B << 8);
+                        ushort value2 = (ushort)(Registers.L | Registers.H << 8);
+                        ushort value = (ushort)(value1 + value2);
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x19: // dad d
+                    {
+                        ushort value1 = (ushort)(Registers.E | Registers.D << 8);
+                        ushort value2 = (ushort)(Registers.L | Registers.H << 8);
+                        ushort value = (ushort)(value1 + value2);
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x29: // dad h
+                    {
+                        ushort value = (ushort)(2 * (Registers.L | Registers.H << 8));
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                        break;
+                    }
+                case 0x39: // dad sp
+                    {
+                        ushort value = (ushort)(_memory.StackPointer + (Registers.L | Registers.H << 8));
+                        Flags.C = (value & 0xFFFF0000) > 0;
+                        Registers.H = (byte)((value & 0xFF00) >> 8);
+                        Registers.L = (byte)(value & 0x00FF);
+                        _programCounter++;
+                    }
+                    break;
                 case 0x02://stax b
                     {
                         ushort value = (ushort)(Registers.C | Registers.B << 8);
@@ -1135,6 +1218,19 @@ namespace Interpreter
                         Registers.H = _memory[(ushort)(dest + 1)];
                     }
                     _programCounter += 3;
+                    break;
+                case 0xe3://xthl
+                    Registers.L = _memory[(ushort)(_memory.StackPointer + 1)];
+                    Registers.H = _memory[(ushort)(_memory.StackPointer + 2)];
+                    _programCounter++;
+                    break;
+                case 0xe9://pchl
+                    ProgramCounter = (Registers.L | Registers.H << 8);
+                    _programCounter++;
+                    break;
+                case 0xf9://sphl
+                    _memory.StackPointer = (ushort)(Registers.L | Registers.H << 8);
+                    _programCounter++;
                     break;
                 case 0x76://hlt
                     Stop();

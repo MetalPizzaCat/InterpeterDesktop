@@ -2,6 +2,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:emul="clr-namespace:InterpreterDesktop"
     mc:Ignorable="d"
     Width="1400"
     Height="750"
@@ -30,7 +31,6 @@
                 <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_stopButtonPressed" />
                 <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_clearRomPressed" />
             </MenuItem>
-            <MenuItem Header="_Settings" Click="_onSettingsButtonPressed" />
             <MenuItem Header="_About" />
         </Menu>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -128,8 +128,11 @@
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
                 </DockPanel>
+                <TextBlock DockPanel.Dock="Top" >Input</TextBlock>
+                <emul:InputPorts DockPanel.Dock="Top" Name="InputTable" />
+                <TextBlock DockPanel.Dock="Top" >Memory</TextBlock>
                 <!-- Using data grid to dispaly memory cells-->
-                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
+                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top"  CanUserSortColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
                         <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />
