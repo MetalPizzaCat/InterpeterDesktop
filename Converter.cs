@@ -51,7 +51,7 @@ namespace Interpreter
 
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex OperationSeparator = new Regex(@"([A-z\d]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex OperationSeparator = new Regex(@"([A-z\d]+)|('(([A-z\d]+)( *|,))+')", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -127,12 +127,18 @@ namespace Interpreter
             Dictionary<int, int> referredAddresses = new Dictionary<int, int>();
             //Key is jump label, value is where to place address of the jump label
             Dictionary<int, string> jumps = new Dictionary<int, string>();
+            //List of all user defined assemble time constants. They function similarly to #define in c++
+            Dictionary<string, string> defines = new Dictionary<string, string>();
             int lineId = 0;
             int address = 0;
             string[] lines = code.Split("\n");
             foreach (string line in lines)
             {
                 string cleanLine = CommentRegex.Replace(line, "");
+                foreach (var define in defines)
+                {
+                    cleanLine = Regex.Replace(cleanLine, $@"{define.Key}\b", define.Value);
+                }
                 //ignore lines that have only comments or whitespaces
                 if (string.IsNullOrWhiteSpace(cleanLine))
                 {
@@ -153,6 +159,19 @@ namespace Interpreter
                     continue;
                 }
                 string name = matches[0].Value.ToLower();
+                if (name == "set")
+                {
+                    if (matches.Count != 3)
+                    {
+                        result.Errors.Add(lineId, "Pseudo operation set needs define name and value");
+                        lineId++;
+                        continue;
+                    }
+                    string clearValue = matches[2].Value.Replace("'", string.Empty);
+                    defines.Add(matches[1].Value, clearValue);
+                    lineId++;
+                    continue;
+                }
                 string? error = _checkInputValidity(matches, info, interpreter);
                 if (error != null)
                 {
@@ -401,13 +420,27 @@ namespace Interpreter
                                 switch (op.Arguments[i - 1])
                                 {
                                     case CommandArgumentType.Int8:
-                                        result.CommandBytes.Add(Convert.ToByte(matches[i].Value, 16));//write the argument
+                                        try
+                                        {
+                                            result.CommandBytes.Add(Convert.ToByte(matches[i].Value, 16));//write the argument
+                                        }
+                                        catch (OverflowException e)
+                                        {
+                                            result.Errors.Add(lineId, "Expected 8bit number got 16bit or more");
+                                        }
                                         break;
                                     case CommandArgumentType.Int16:
-                                        //First store argument's L then H 
-                                        ushort val = Convert.ToUInt16(matches[i].Value, 16);
-                                        result.CommandBytes.Add((byte)(val & 0xff));
-                                        result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                                        try
+                                        {
+                                            //First store argument's L then H 
+                                            ushort val = Convert.ToUInt16(matches[i].Value, 16);
+                                            result.CommandBytes.Add((byte)(val & 0xff));
+                                            result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                                        }
+                                        catch (OverflowException e)
+                                        {
+                                            result.Errors.Add(lineId, "Expected 16bit number got larger");
+                                        }
                                         break;
                                 }
                             }
