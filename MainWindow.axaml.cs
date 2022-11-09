@@ -13,9 +13,9 @@ namespace Nema
     public partial class MainWindow : Window
     {
 
-        private Interpreter.Emulator _emulator;
+        private Emulator.Emulator _emulator;
 
-        public Interpreter.Emulator InterpreterObject => _emulator;
+        public Emulator.Emulator InterpreterObject => _emulator;
         private bool _displayOutAsText = false;
 
         private ObservableCollection<string> _errors = new ObservableCollection<string>();
@@ -23,8 +23,8 @@ namespace Nema
         public ObservableCollection<string> Output => _output;
 
         public ObservableCollection<string> Errors => _errors;
-        public Interpreter.ProcessorFlags Flags => _emulator.Flags;
-        public Interpreter.Registers Registers => _emulator.Registers;
+        public Emulator.ProcessorFlags Flags => _emulator.Flags;
+        public Emulator.Registers Registers => _emulator.Registers;
 
         private string? _currentFile;
 
@@ -79,7 +79,7 @@ namespace Nema
         public MainWindow()
         {
             InitializeComponent();
-            _emulator = new Interpreter.Emulator();
+            _emulator = new Emulator.Emulator();
             _emulator.OnOutPortValueChanged += _onOutPortValueChanged;
             _emulator.OnInPortRead += _inputRead;
             MemoryGrid.Items = _emulator.Memory.MemoryDisplayGrid;
@@ -130,7 +130,7 @@ namespace Nema
                 }
                 System.Console.WriteLine("Exited execution");
             }
-            catch (Interpreter.ProtectedMemoryWriteException e)
+            catch (Emulator.ProtectedMemoryWriteException e)
             {
                 _displayFatalError($"Execution error : {e.Message}");
                 return;
@@ -264,7 +264,7 @@ namespace Nema
         {
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
-                Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _emulator);
+                Emulator.ProcessedCodeInfo code = Emulator.Converter.Prepare(CodeInputBox.Text, _emulator);
                 _recordErrors(code.Errors);
                 _emulator.SetCode(code);
                 _emulator.ResetProcessor();
@@ -284,6 +284,12 @@ namespace Nema
         private void _onExitRequested(object? sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private async void _displayHelp()
+        {
+            HelpWindow help = new HelpWindow();
+            await help.ShowDialog(this);
         }
     }
 }

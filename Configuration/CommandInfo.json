@@ -28,168 +28,198 @@
                 0,
                 1
             ],
-            "OpCode": "0"
+            "OpCode": "0",
+            "Note": "Writes a value into the register"
         },
         "mov": {
             "Arguments": [
                 0,
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0",
+            "Note": "Copies value from register on the left to register on the right"
         },
         "sta": {
             "Arguments": [
                 2
             ],
-            "OpCode": "32"
+            "OpCode": "32",
+            "Note": "Write value in accumulator at memory address"
         },
         "lda": {
             "Arguments": [
                 2
             ],
-            "OpCode": "3a"
+            "OpCode": "3a",
+            "Note": "Load value in accumulator at memory address"
         },
         "add": {
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0",
+            "Note": "Adds value from register to accumulator"
         },
         "adc": {
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0",
+            "Note": "Adds value from register to accumulator with carry"
         },
         "adi": {
             "Arguments": [
                 1
             ],
-            "OpCode": "c6"
+            "OpCode": "c6",
+            "Note": "Adds immediate value  to accumulator"
         },
         "aci": {
             "Arguments": [
                 1
             ],
-            "OpCode": "ce"
+            "OpCode": "ce",
+            "Note": "Adds immediate value  to accumulator with carry"
         },
         "sub": {
             "Arguments": [
                 0
             ],
-            "OpCode": 0
+            "OpCode": 0,
+            "Note": "Subtracts value in register from accumulator"
         },
         "sbb": {
             "Arguments": [
                 0
             ],
-            "OpCode": 0
+            "OpCode": 0,
+            "Note": "Subtracts value in register from accumulator with carry"
         },
         "sbi": {
             "Arguments": [
                 1
             ],
-            "OpCode": "de"
+            "OpCode": "de",
+            "Note": "Subtracts immediate value  from accumulator"
         },
         "sui": {
             "Arguments": [
                 1
             ],
-            "OpCode": "d6"
+            "OpCode": "d6",
+            "Note": "Subtracts immediate value  from accumulator with carry"
         },
         "cpi": {
             "Arguments": [
                 1
             ],
-            "OpCode": "fe"
+            "OpCode": "fe",
+            "Note": "Compares accumulator with immediate value"
         },
         "cmp": {
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0",
+            "Note": "Compares accumulator with register"
         },
         "call": {
             "Arguments": [
                 4
             ],
-            "OpCode": "cd"
+            "OpCode": "cd",
+            "Note": "Calls a subroutine"
         },
         "cm": {
             "Arguments": [
                 4
             ],
-            "OpCode": "fc"
+            "OpCode": "fc",
+            "Note": "Calls a subroutine if S flag is true"
         },
         "cpe": {
             "Arguments": [
                 4
             ],
-            "OpCode": "ec"
+            "OpCode": "ec",
+            "Note": "Calls a subroutine if P flag is true"
         },
         "cc": {
             "Arguments": [
                 4
             ],
-            "OpCode": "dc"
+            "OpCode": "dc",
+            "Note": "Calls a subroutine if C flag is true"
         },
         "cz": {
             "Arguments": [
                 4
             ],
-            "OpCode": "cc"
+            "OpCode": "cc",
+            "Note": "Calls a subroutine if Z flag is true"
         },
         "cp": {
             "Arguments": [
                 4
             ],
-            "OpCode": "f4"
+            "OpCode": "f4",
+            "Note": "Calls a subroutine if S flag is false"
         },
         "cpo": {
             "Arguments": [
                 4
             ],
-            "OpCode": "e4"
+            "OpCode": "e4",
+            "Note": "Calls a subroutine if P flag is false"
         },
         "cnc": {
             "Arguments": [
                 4
             ],
-            "OpCode": "d4"
+            "OpCode": "d4",
+            "Note": "Calls a subroutine if C flag is false"
         },
         "cnz": {
             "Arguments": [
                 4
             ],
-            "OpCode": "c4"
+            "OpCode": "c4",
+            "Note": "Calls a subroutine if Z flag is false"
         },
         "ret": {
             "Arguments": [],
-            "OpCode": "c9"
+            "OpCode": "c9",
+            "Note": "Exit subroutine"
         },
         "rm": {
             "Arguments": [],
-            "OpCode": "f8"
+            "OpCode": "f8",
+            "Note": "Exit subroutine if S is true"
         },
         "rpe": {
             "Arguments": [],
-            "OpCode": "e8"
+            "OpCode": "e8",
+            "Note": "Exit subroutine if P is true"
         },
         "rc": {
             "Arguments": [],
-            "OpCode": "d8"
+            "OpCode": "d8",
+            "Note": "Exit subroutine if C is true"
         },
         "rz": {
             "Arguments": [],
-            "OpCode": "c8"
+            "OpCode": "c8",
+            "Note": "Exit subroutine if Z is true"
         },
         "rp": {
             "Arguments": [],
-            "OpCode": "f0"
+            "OpCode": "f0",
+            "Note": "Exit subroutine if P is true"
         },
         "rpo": {
             "Arguments": [],
-            "OpCode": "e0"
+            "OpCode": "e0",
+            "Note": "Exit subroutine if P is false"
         },
         "rnc": {
             "Arguments": [],

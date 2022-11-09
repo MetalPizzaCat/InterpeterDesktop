@@ -1,6 +1,6 @@
 
 using System.ComponentModel;
-namespace Interpreter
+namespace Emulator
 {
     public class Registers : INotifyPropertyChanged, IProcessorComponent
     {

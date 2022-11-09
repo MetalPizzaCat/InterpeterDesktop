@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System;
 using System.Linq;
-namespace Interpreter
+namespace Emulator
 {
     /// <summary>
     /// Thrown when converter encounters invalid operation line

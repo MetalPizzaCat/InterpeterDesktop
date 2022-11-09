@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  mc:Ignorable="d"
+  MinHeight="300"
+  MinWidth="750"
+  Height="300"
+  Width="300"
+  x:Class="Nema.HelpWindow"
+  Title="HelpWindow" SizeToContent="Width">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top">
+      <TextBlock HorizontalAlignment="Center">Made by Metal "Pizza" Cat</TextBlock>
+      <TextBlock HorizontalAlignment="Center">for UNI assigment in 2022</TextBlock>
+      <TextBlock HorizontalAlignment="Center">Licensed under GPL-V2</TextBlock>
+      <TextBlock HorizontalAlignment="Center">https://github.com/MetalPizzaCat/NEMA-8</TextBlock>
+    </StackPanel>
+    <DataGrid Items="{Binding Commands}" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Name="CommandTable" AutoGenerateColumns = "True">
+    </DataGrid>
+  </DockPanel>
+</Window>

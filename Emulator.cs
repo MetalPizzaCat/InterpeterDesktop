@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
-namespace Interpreter
+namespace Emulator
 {
     [System.Serializable]
     public class InterpreterInvalidRegisterException : System.Exception

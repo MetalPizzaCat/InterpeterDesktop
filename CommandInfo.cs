@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Interpreter
+namespace Emulator
 {
     public enum CommandArgumentType
     {
@@ -13,6 +13,11 @@ namespace Interpreter
     {
         public string OpCode = "0";
         public List<CommandArgumentType> Arguments = new List<CommandArgumentType>();
+
+        /// <summary>
+        /// User written note that explains what this command does
+        /// </summary>
+        public string? Note;
     }
 
     public class ProcessorCommandsInfo
@@ -30,5 +35,6 @@ namespace Interpreter
         /// used for assembly time checks
         /// </summary>
         public List<string> StaticAddressCommands = new List<string>();
+
     }
 }

@@ -7,7 +7,7 @@ using System;
 using Avalonia.Data;
 using System.ComponentModel;
 
-namespace Interpreter
+namespace Emulator
 {
     public record MemorySegmentationData
     {

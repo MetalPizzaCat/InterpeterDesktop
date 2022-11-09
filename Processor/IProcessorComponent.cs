@@ -1,4 +1,4 @@
-namespace Interpreter
+namespace Emulator
 {
     /// <summary>
     /// Basic functions that all processor components must implement in order to work properly
