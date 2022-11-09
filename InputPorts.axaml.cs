@@ -5,7 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Data;
 using System.Collections.ObjectModel;
 
-namespace InterpreterDesktop
+namespace Nema
 {
     public partial class InputPorts : UserControl
     {
@@ -13,6 +13,16 @@ namespace InterpreterDesktop
         public event PortValueChangedEventHandler? OnPortValueChanged;
         public static readonly int PortCount = 16;
         public ObservableCollection<MemoryGridRow> Ports { get; } = new ObservableCollection<MemoryGridRow>();
+
+        /// <summary>
+        /// Changes what value is currently inputed in the table
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="value"></param>
+        public void SetPortValue(int port, byte value)
+        {
+            Ports[port/16][port - port/16] = value;
+        }
 
         public InputPorts()
         {

@@ -1,4 +1,5 @@
 #define USE_DEBUG_TOOLS
+//#define RESET_INPUT_UPON_READING
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
@@ -6,15 +7,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 
-namespace InterpreterDesktop
+namespace Nema
 {
 
     public partial class MainWindow : Window
     {
 
-        private Interpreter.Interpreter _interpreter;
+        private Interpreter.Emulator _emulator;
 
-        public Interpreter.Interpreter InterpreterObject => _interpreter;
+        public Interpreter.Emulator InterpreterObject => _emulator;
         private bool _displayOutAsText = false;
 
         private ObservableCollection<string> _errors = new ObservableCollection<string>();
@@ -22,8 +23,10 @@ namespace InterpreterDesktop
         public ObservableCollection<string> Output => _output;
 
         public ObservableCollection<string> Errors => _errors;
-        public Interpreter.ProcessorFlags Flags => _interpreter.Flags;
-        public Interpreter.Registers Registers => _interpreter.Registers;
+        public Interpreter.ProcessorFlags Flags => _emulator.Flags;
+        public Interpreter.Registers Registers => _emulator.Registers;
+
+        private string? _currentFile;
 
         public bool DisplayOutAsText
         {
@@ -35,7 +38,7 @@ namespace InterpreterDesktop
                 if (value)
                 {
                     int port = 0;
-                    foreach (byte b in _interpreter.OutputPorts)
+                    foreach (byte b in _emulator.OutputPorts)
                     {
                         _output[port++] = System.Text.Encoding.ASCII.GetString(new[] { b });
                     }
@@ -43,7 +46,7 @@ namespace InterpreterDesktop
                 else
                 {
                     int port = 0;
-                    foreach (byte b in _interpreter.OutputPorts)
+                    foreach (byte b in _emulator.OutputPorts)
                     {
                         _output[port++] = b.ToString("X2");
                     }
@@ -76,17 +79,27 @@ namespace InterpreterDesktop
         public MainWindow()
         {
             InitializeComponent();
-            _interpreter = new Interpreter.Interpreter();
-            _interpreter.OnOutPortValueChanged += _onOutPortValueChanged;
-            MemoryGrid.Items = _interpreter.Memory.MemoryDisplayGrid;
+            _emulator = new Interpreter.Emulator();
+            _emulator.OnOutPortValueChanged += _onOutPortValueChanged;
+            _emulator.OnInPortRead += _inputRead;
+            MemoryGrid.Items = _emulator.Memory.MemoryDisplayGrid;
             List<string> temp = new List<string>();
-            foreach (byte b in _interpreter.OutputPorts)
+            foreach (byte b in _emulator.OutputPorts)
             {
                 temp.Add(b.ToString("X2"));
             }
             _output = new ObservableCollection<string>(temp);
             InputTable.OnPortValueChanged += _onInValueChanged;
+
             this.DataContext = this;
+        }
+
+        private void _inputRead(int port)
+        {
+#if RESET_INPUT_UPON_READING
+            _interpreter.SetIn(port, 0);
+            InputTable.SetPortValue(port, 0);
+#endif
         }
 
         private void _displayFatalError(string msg)
@@ -104,15 +117,15 @@ namespace InterpreterDesktop
         {
             try
             {
-                while (_interpreter.IsRunning)
+                while (_emulator.IsRunning)
                 {
 
-                    _interpreter.Step();
+                    _emulator.Step();
 
-                    if (_interpreter.CurrentStepCounter >= _interpreter.StepsBeforeSleep)
+                    if (_emulator.CurrentStepCounter >= _emulator.StepsBeforeSleep)
                     {
                         await Task.Delay(1);
-                        _interpreter.ResetStepCounter();
+                        _emulator.ResetStepCounter();
                     }
                 }
                 System.Console.WriteLine("Exited execution");
@@ -142,13 +155,13 @@ namespace InterpreterDesktop
         /// <summary>
         /// Simply resets memory and starts execution
         /// </summary>
-        private void _runButtonPressed(object? sender, RoutedEventArgs e)
+        private void _run()
         {
-            _interpreter.SoftResetProcessor();
+            _emulator.SoftResetProcessor();
             Dispatcher.UIThread.Post(() => RunEmulator(), DispatcherPriority.Background);
         }
 
-        private async void _loadRomPressed(object? sender, RoutedEventArgs e)
+        private async void _loadRom()
         {
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filters?.Add(new FileDialogFilter() { Name = "Binary files", Extensions = { "bin" } });
@@ -159,11 +172,11 @@ namespace InterpreterDesktop
                 return;
             }
             byte[] rom = System.IO.File.ReadAllBytes(file);
-            _interpreter.Memory.WriteRom(rom);
-            _interpreter.ResetProcessor();
+            _emulator.Memory.WriteRom(rom);
+            _emulator.ResetProcessor();
         }
 
-        private async void _dumpRomPressed(object? sender, RoutedEventArgs e)
+        private async void _dumpRom()
         {
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filters?.Add(new FileDialogFilter() { Name = "Binary files", Extensions = { "bin", "dat" } });
@@ -174,10 +187,10 @@ namespace InterpreterDesktop
             {
                 return;
             }
-            await System.IO.File.WriteAllBytesAsync(file, _interpreter.Memory.ReadRom());
+            await System.IO.File.WriteAllBytesAsync(file, _emulator.Memory.ReadRom());
         }
 
-        private async void _dumpRamPressed(object? sender, RoutedEventArgs e)
+        private async void _dumpRam()
         {
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filters?.Add(new FileDialogFilter() { Name = "Binary files", Extensions = { "bin", "dat" } });
@@ -187,41 +200,53 @@ namespace InterpreterDesktop
             {
                 return;
             }
-            await System.IO.File.WriteAllBytesAsync(file, _interpreter.Memory.ReadRam());
+            await System.IO.File.WriteAllBytesAsync(file, _emulator.Memory.ReadRam());
         }
 
-        private async void _loadFilePressed(object? sender, RoutedEventArgs e)
+        private void _clearRom()
+        {
+            _emulator.Memory.ClearMemory();
+        }
+
+        /// <summary>
+        /// Opens a file dialog for saving code to the file
+        /// </summary>
+        /// <param name="newFile">If true function will work as if no file has already been opened</param>
+        private async void _saveFile(bool newFile)
+        {
+            if (!newFile && _currentFile != null)
+            {
+                System.IO.File.WriteAllText(_currentFile, CodeInputBox.Text);
+                return;
+            }
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Text files", Extensions = { "txt" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Assembly file", Extensions = { "asm", "80asm", "nema" } });
+            dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
+            _currentFile = await dialog.ShowAsync(this);
+            Title = $"NEMA-8 {_currentFile ?? string.Empty}";
+            if (_currentFile == null)
+            {
+                return;
+            }
+            System.IO.File.WriteAllText(_currentFile, CodeInputBox.Text);
+
+        }
+
+        private async void _loadFile()
         {
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filters?.Add(new FileDialogFilter() { Name = "Text files", Extensions = { "txt" } });
             dialog.Filters?.Add(new FileDialogFilter() { Name = "Assembly file", Extensions = { "asm", "80asm", "nema" } });
             dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
-            string? file = await dialog.ShowAsync(this);
-            if (file == null)
+            _currentFile = await dialog.ShowAsync(this);
+            Title = $"NEMA-8 {_currentFile ?? string.Empty}";
+            if (_currentFile == null)
             {
                 return;
             }
-            string text = System.IO.File.ReadAllText(file);
+            string text = System.IO.File.ReadAllText(_currentFile);
             CodeInputBox.Text = text;
-        }
-
-        private async void _saveFilePressed(object? sender, RoutedEventArgs e)
-        {
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filters?.Add(new FileDialogFilter() { Name = "Text files", Extensions = { "txt" } });
-            dialog.Filters?.Add(new FileDialogFilter() { Name = "Assembly file", Extensions = { "asm", "80asm", "nema" } });
-            dialog.Filters?.Add(new FileDialogFilter() { Name = "Any", Extensions = { "*" } });
-            string? file = await dialog.ShowAsync(this);
-            if (file == null)
-            {
-                return;
-            }
-            System.IO.File.WriteAllText(file, CodeInputBox.Text);
-        }
-
-        private void _clearRomPressed(object? sender, RoutedEventArgs e)
-        {
-            _interpreter.Memory.ClearMemory();
         }
 
         private async void _onSettingsButtonPressed(object? sender, RoutedEventArgs e)
@@ -230,30 +255,30 @@ namespace InterpreterDesktop
             await settingsWindow.ShowDialog(this);
         }
 
-        private void _stopButtonPressed(object? sender, RoutedEventArgs e)
+        private void _stopEmulation()
         {
-            _interpreter.Stop();
+            _emulator.Stop();
         }
 
-        private void _assembleButtonPressed(object? sender, RoutedEventArgs e)
+        private void _assemble()
         {
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
-                Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _interpreter);
+                Interpreter.ProcessedCodeInfo code = Interpreter.Converter.Prepare(CodeInputBox.Text, _emulator);
                 _recordErrors(code.Errors);
-                _interpreter.SetCode(code);
-                _interpreter.ResetProcessor();
+                _emulator.SetCode(code);
+                _emulator.ResetProcessor();
             }
         }
 
         private void _onInValueChanged(int port, byte value)
         {
-            _interpreter.SetIn(port, value);
+            _emulator.SetIn(port, value);
         }
 
-        private void _stepButtonPressed(object? sender, RoutedEventArgs e)
+        private void _step()
         {
-            _interpreter.Step();
+            _emulator.Step();
         }
 
         private void _onExitRequested(object? sender, RoutedEventArgs e)

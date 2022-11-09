@@ -17,12 +17,15 @@ namespace Interpreter
             System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
-    public class Interpreter : INotifyPropertyChanged
+    public class Emulator : INotifyPropertyChanged
     {
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public delegate void OutPortValueChangedEventHandler(int port, byte value);
+        public delegate void InPortReadEventHandler(int port);
         public event OutPortValueChangedEventHandler? OnOutPortValueChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
+        public event InPortReadEventHandler? OnInPortRead;
+
 
         private Timer _timer;
         /// <summary>
@@ -225,7 +228,7 @@ namespace Interpreter
             return (ushort)((h << 8) | l);
         }
 
-        public Interpreter()
+        public Emulator()
         {
             _registers = new Registers();
             _flags = new ProcessorFlags();
@@ -1046,6 +1049,7 @@ namespace Interpreter
                     break;
                 case 0xdb://in
                     Registers.A = _inputPorts[_memory[(ushort)(ProgramCounter + 1)]];
+                    OnInPortRead?.Invoke(_memory[(ushort)(ProgramCounter + 1)]);
                     _programCounter++;
                     break;
                 case 0xd3: // out

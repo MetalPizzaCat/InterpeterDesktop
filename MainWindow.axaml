@@ -2,34 +2,35 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:emul="clr-namespace:InterpreterDesktop"
+    xmlns:emul="clr-namespace:Nema"
     mc:Ignorable="d"
     Width="1400"
     Height="750"
     MinWidth="1300"
     MinHeight="700"
-    x:Class="InterpreterDesktop.MainWindow"
+    x:Class="Nema.MainWindow"
     Title="NEMA-8">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="_loadFilePressed" />
-                <MenuItem Header="_Save" Click="_saveFilePressed" />
-                <MenuItem Header="Save _as" Click="_saveFilePressed" />
+                <MenuItem Header="_Open" Command="{Binding _loadFile}" HotKey="Ctrl+O" />
+                <MenuItem Header="_Open" Command="{Binding _newFile}" HotKey="Ctrl+N" />
+                <MenuItem Header="_Save" Command="{Binding _saveFile}" CommandParameter="False" HotKey="Ctrl+S" />
+                <MenuItem Header="Save _as" Command="{Binding _saveFile}" CommandParameter="True" HotKey="Ctrl+Shift+S"/>
                 <Separator />
-                <MenuItem Header="_Load ROM" ToolTip.Tip="Load data from ROM file to memory" Click="_loadRomPressed" />
-                <MenuItem Header="_Dump ROM" ToolTip.Tip="Dump current contents of ROM into a file" Click="_dumpRomPressed" />
+                <MenuItem Header="_Load ROM" ToolTip.Tip="Load data from ROM file to memory" Command="{Binding _loadRom}" HotKey="Ctrl+Shift+G" />
+                <MenuItem Header="_Dump ROM" ToolTip.Tip="Dump current contents of ROM into a file" Command="{Binding _dumpRom}" HotKey="Ctrl+Shift+D" />
                 <Separator />
-                <MenuItem Header="_Dump RAM" ToolTip.Tip="Dump current contents of RAM into a file for viewing in hex editors" Click="_dumpRamPressed" />
+                <MenuItem Header="_Dump RAM" ToolTip.Tip="Dump current contents of RAM into a file for viewing in hex editors"  Command="{Binding _dumpRam}"/>
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
             <MenuItem Header="_Emulation">
-                <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" Click="_runButtonPressed" />
-                <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Click="_stepButtonPressed" />
-                <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Click="_assembleButtonPressed" />
-                <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Click="_stopButtonPressed" />
-                <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Click="_clearRomPressed" />
+                <MenuItem Header="_Run" ToolTip.Tip="Assembles and runs code" Command="{Binding _run}"  HotKey="F5"/>
+                <MenuItem Header="_Step" ToolTip.Tip="Steps through the code" Command="{Binding _step}" HotKey="Ctrl+F5"/>
+                <MenuItem Header="_Assemble" ToolTip.Tip="Assembles the code" Command="{Binding _assemble}"  HotKey="Ctrl+Shift+B" />
+                <MenuItem Header="_Stop" ToolTip.Tip="Stops the execution" Command="{Binding _stopEmulation}"  HotKey="F6"/>
+                <MenuItem Header="_Clear ROM" ToolTip.Tip="Clears ROM" Command="{Binding _clearRom}"  HotKey="Ctrl+F7"/>
             </MenuItem>
             <MenuItem Header="_About" />
         </Menu>
@@ -128,11 +129,11 @@
                         <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
                     </DockPanel>
                 </DockPanel>
-                <TextBlock DockPanel.Dock="Top" >Input</TextBlock>
+                <TextBlock DockPanel.Dock="Top">Input</TextBlock>
                 <emul:InputPorts DockPanel.Dock="Top" Name="InputTable" />
-                <TextBlock DockPanel.Dock="Top" >Memory</TextBlock>
+                <TextBlock DockPanel.Dock="Top">Memory</TextBlock>
                 <!-- Using data grid to dispaly memory cells-->
-                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top"  CanUserSortColumns="False">
+                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top" CanUserSortColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
                         <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />

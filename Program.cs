@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace InterpreterDesktop
+namespace Nema
 {
     class Program
     {

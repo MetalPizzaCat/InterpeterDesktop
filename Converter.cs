@@ -60,7 +60,7 @@ namespace Interpreter
         /// <param name="input">Collection of reg ex matches that should contain [OPNAME], [Arg1] ...[ArgN]</param>
         /// <param name="info">Processor commands info config that has information about commands</param>
         /// <returns>Null if no errors were found, or error message</returns>
-        private static string? _checkInputValidity(MatchCollection input, ProcessorCommandsInfo info, Interpreter interpreter)
+        private static string? _checkInputValidity(MatchCollection input, ProcessorCommandsInfo info, Emulator interpreter)
         {
             if (info.Commands.ContainsKey(input[0].Value))
             {
@@ -115,7 +115,7 @@ namespace Interpreter
         /// Converts input code into operations
         /// </summary>
         /// <param name="code"></param>
-        public static ProcessedCodeInfo Prepare(string code, Interpreter interpreter)
+        public static ProcessedCodeInfo Prepare(string code, Emulator interpreter)
         {
             string infoText = System.IO.File.ReadAllText("./Configuration/CommandInfo.json");
             ProcessorCommandsInfo info = Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessorCommandsInfo>(infoText) ?? throw new NullReferenceException("Unable to process configuration");
