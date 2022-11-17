@@ -647,7 +647,6 @@ namespace Emulator
                     {
                         ushort result = (ushort)(Registers.A + _memory[(ushort)(ProgramCounter + 1)]);
                         Registers.A = (byte)result;
-                        ProgramCounter++;
                         CheckFlags(result);
                         ProgramCounter += 2;
                     }
@@ -656,7 +655,6 @@ namespace Emulator
                     {
                         ushort result = (ushort)(Registers.A + _memory[(ushort)(ProgramCounter + 1)] + (Flags.C ? 1 : 0));
                         Registers.A = (byte)result;
-                        ProgramCounter++;
                         CheckFlags(result);
                         ProgramCounter += 2;
                     }
@@ -665,7 +663,6 @@ namespace Emulator
                     {
                         ushort result = (ushort)(Registers.A - _memory[(ushort)(ProgramCounter + 1)]);
                         Registers.A = (byte)result;
-                        ProgramCounter++;
                         CheckFlags(result);
                         ProgramCounter += 2;
                     }
@@ -674,7 +671,6 @@ namespace Emulator
                     {
                         ushort result = (ushort)(Registers.A - _memory[(ushort)(ProgramCounter + 1)] - (Flags.C ? 1 : 0));
                         Registers.A = (byte)result;
-                        ProgramCounter++;
                         CheckFlags(result);
                         ProgramCounter += 2;
                     }
