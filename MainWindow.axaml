@@ -126,7 +126,7 @@
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
                         <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
-                        <TextBlock Text="{Binding InterpreterObject.ProgramCounter}" />
+                        <TextBlock Name="ProgramCounterLabel" Text="{Binding ProgramCounter}" />
                     </DockPanel>
                 </DockPanel>
                 <TextBlock DockPanel.Dock="Top">Input</TextBlock>

@@ -21,7 +21,15 @@ namespace Nema
         /// <param name="value"></param>
         public void SetPortValue(int port, byte value)
         {
-            Ports[port/16][port - port/16] = value;
+            Ports[port / 16][port - port / 16] = value;
+        }
+
+        public void ResetPorts()
+        {
+            for (int i = 0; i < PortCount; i++)
+            {
+                SetPortValue(i, 0);
+            }
         }
 
         public InputPorts()

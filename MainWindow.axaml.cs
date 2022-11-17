@@ -26,6 +26,8 @@ namespace Nema
         public Emulator.ProcessorFlags Flags => _emulator.Flags;
         public Emulator.Registers Registers => _emulator.Registers;
 
+        public string ProgramCounter { get; set; } = "00";
+
         private string? _currentFile;
 
         public bool DisplayOutAsText
@@ -82,6 +84,7 @@ namespace Nema
             _emulator = new Emulator.Emulator();
             _emulator.OnOutPortValueChanged += _onOutPortValueChanged;
             _emulator.OnInPortRead += _inputRead;
+            _emulator.OnInputResetRequested += _resetInput;
             MemoryGrid.Items = _emulator.Memory.MemoryDisplayGrid;
             List<string> temp = new List<string>();
             foreach (byte b in _emulator.OutputPorts)
@@ -100,6 +103,11 @@ namespace Nema
             _interpreter.SetIn(port, 0);
             InputTable.SetPortValue(port, 0);
 #endif
+        }
+
+        private void _resetInput()
+        {
+            InputTable.ResetPorts();
         }
 
         private void _displayFatalError(string msg)
@@ -121,10 +129,10 @@ namespace Nema
                 {
 
                     _emulator.Step();
-
+                    ProgramCounterLabel.Text = _emulator.ProgramCounter.ToString("X2");
                     if (_emulator.CurrentStepCounter >= _emulator.StepsBeforeSleep)
                     {
-                        await Task.Delay(1);
+                        await Task.Delay(1000);
                         _emulator.ResetStepCounter();
                     }
                 }
@@ -264,7 +272,7 @@ namespace Nema
         {
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
-                Emulator.ProcessedCodeInfo code = Emulator.Converter.Prepare(CodeInputBox.Text, _emulator);
+                Emulator.ProcessedCodeInfo code = Emulator.Converter.Prepare(CodeInputBox.Text, _emulator.Memory.MemoryData);
                 _recordErrors(code.Errors);
                 _emulator.SetCode(code);
                 _emulator.ResetProcessor();

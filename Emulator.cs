@@ -22,10 +22,11 @@ namespace Emulator
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public delegate void OutPortValueChangedEventHandler(int port, byte value);
         public delegate void InPortReadEventHandler(int port);
+        public delegate void InputResetRequestedEventHandler();
         public event OutPortValueChangedEventHandler? OnOutPortValueChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
         public event InPortReadEventHandler? OnInPortRead;
-
+        public event InputResetRequestedEventHandler? OnInputResetRequested;
 
         private Timer _timer;
         /// <summary>
@@ -1050,11 +1051,21 @@ namespace Emulator
                 case 0xdb://in
                     Registers.A = _inputPorts[_memory[(ushort)(ProgramCounter + 1)]];
                     OnInPortRead?.Invoke(_memory[(ushort)(ProgramCounter + 1)]);
-                    _programCounter++;
+                    _programCounter += 2;
                     break;
                 case 0xd3: // out
-                    SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
-                    _programCounter++;
+                    if (_memory[(ushort)(ProgramCounter + 1)] == 0x10) // port 0x10 is port used for sending requests
+                    {
+                        if ((Registers.A & 0x1) == 1)
+                        {
+                            OnInputResetRequested?.Invoke();
+                        }
+                    }
+                    else
+                    {
+                        SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
+                    }
+                   _programCounter += 2;
                     break;
                 case 0x2f://cma
                     Registers.A = (byte)(~Registers.A);

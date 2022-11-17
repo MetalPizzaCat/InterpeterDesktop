@@ -60,7 +60,7 @@ namespace Emulator
         /// <param name="input">Collection of reg ex matches that should contain [OPNAME], [Arg1] ...[ArgN]</param>
         /// <param name="info">Processor commands info config that has information about commands</param>
         /// <returns>Null if no errors were found, or error message</returns>
-        private static string? _checkInputValidity(MatchCollection input, ProcessorCommandsInfo info, Emulator interpreter)
+        private static string? _checkInputValidity(MatchCollection input, ProcessorCommandsInfo info, MemorySegmentationData memory)
         {
             if (info.Commands.ContainsKey(input[0].Value))
             {
@@ -91,7 +91,7 @@ namespace Emulator
                                 return ($"Argument {i - 1} can only contain numbers");
                             }
                             ushort addr = Convert.ToUInt16(input[i].Value, 16);
-                            if (addr >= interpreter.Memory.MemoryData.TotalSize)
+                            if (addr >= memory.TotalSize)
                             {
                                 return $"Argument {i - 1} is an address that points outside of allowed memory";
                             }
@@ -115,7 +115,7 @@ namespace Emulator
         /// Converts input code into operations
         /// </summary>
         /// <param name="code"></param>
-        public static ProcessedCodeInfo Prepare(string code, Emulator interpreter)
+        public static ProcessedCodeInfo Prepare(string code, MemorySegmentationData memory)
         {
             string infoText = System.IO.File.ReadAllText("./Configuration/CommandInfo.json");
             ProcessorCommandsInfo info = Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessorCommandsInfo>(infoText) ?? throw new NullReferenceException("Unable to process configuration");
@@ -172,7 +172,7 @@ namespace Emulator
                     lineId++;
                     continue;
                 }
-                string? error = _checkInputValidity(matches, info, interpreter);
+                string? error = _checkInputValidity(matches, info, memory);
                 if (error != null)
                 {
                     result.Errors.Add(lineId, error);
@@ -467,14 +467,14 @@ namespace Emulator
             }
             foreach (var addresses in referredAddresses)
             {
-                if (addresses.Value < interpreter.Memory.MemoryData.RomSize)
+                if (addresses.Value < memory.RomSize)
                 {
-                    result.Errors.Add(addresses.Key, $"Illegal write address.  0000 to {(interpreter.Memory.MemoryData.RomSize).ToString("X4")} is READ only memory");
+                    result.Errors.Add(addresses.Key, $"Illegal write address.  0000 to {(memory.RomSize).ToString("X4")} is READ only memory");
                 }
 #if FORBID_WRITES_OUTSIDE_RAM
-                else if (addresses.Value < interpreter.Memory.MemoryData.RamStart || addresses.Value > interpreter.Memory.MemoryData.RamEnd)
+                else if (addresses.Value < memory.RamStart || addresses.Value > memory.RamEnd)
                 {
-                    result.Errors.Add(addresses.Key, $"Illegal write address.  Only writes to RAM ({interpreter.Memory.MemoryData.RamStart} to {interpreter.Memory.MemoryData.RamEnd}");
+                    result.Errors.Add(addresses.Key, $"Illegal write address.  Only writes to RAM ({memory.RamStart} to {memory.RamEnd}");
                 }
 #endif
             }
