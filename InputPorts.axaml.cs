@@ -29,6 +29,7 @@ namespace Nema
             for (int i = 0; i < PortCount; i++)
             {
                 SetPortValue(i, 0);
+                OnPortValueChanged?.Invoke(i, 0);
             }
         }
 

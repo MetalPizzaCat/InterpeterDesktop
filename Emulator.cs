@@ -1059,6 +1059,7 @@ namespace Emulator
                         if ((Registers.A & 0x1) == 1)
                         {
                             OnInputResetRequested?.Invoke();
+                        
                         }
                     }
                     else
