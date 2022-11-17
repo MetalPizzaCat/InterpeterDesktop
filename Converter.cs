@@ -526,6 +526,7 @@ namespace Emulator
                 {
                     result.CommandBytes[currentAddress++] = ((byte)value[i]);
                 }
+                result.CommandBytes[currentAddress] = 0;
             }
             result.Success = result.Errors.Count == 0;
             return result;
