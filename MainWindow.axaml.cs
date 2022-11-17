@@ -28,6 +28,8 @@ namespace Nema
 
         public string ProgramCounter { get; set; } = "00";
 
+        private int _emulationSleepLength = 1;
+
         private string? _currentFile;
 
         public bool DisplayOutAsText
@@ -127,12 +129,11 @@ namespace Nema
             {
                 while (_emulator.IsRunning)
                 {
-
                     _emulator.Step();
                     ProgramCounterLabel.Text = _emulator.ProgramCounter.ToString("X2");
                     if (_emulator.CurrentStepCounter >= _emulator.StepsBeforeSleep)
                     {
-                        await Task.Delay(1000);
+                        await Task.Delay(_emulationSleepLength);
                         _emulator.ResetStepCounter();
                     }
                 }
@@ -292,6 +293,13 @@ namespace Nema
         private void _onExitRequested(object? sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private async void _displaySettings()
+        {
+            SettingsWindow settings = new SettingsWindow();
+            await settings.ShowDialog(this);
+            _emulationSleepLength = settings.EmulationSpeed;
         }
 
         private async void _displayHelp()
