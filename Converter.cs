@@ -34,6 +34,11 @@ namespace Emulator
         public List<byte> CommandBytes;
 
         public Dictionary<int, string> Errors;
+
+        /// <summary>
+        /// List of all string literals written by developer. Used for avoiding to have manually type out text in ROM
+        /// </summary>
+        public Dictionary<int, string> StringLiterals;
         public bool Success;
 
         public ProcessedCodeInfo()
@@ -43,6 +48,7 @@ namespace Emulator
             CommandBytes = new List<byte>();
             Errors = new Dictionary<int, string>();
             Success = false;
+            StringLiterals = new Dictionary<int, string>();
         }
     }
 
@@ -170,6 +176,29 @@ namespace Emulator
                     string clearValue = matches[2].Value.Replace("'", string.Empty);
                     defines.Add(matches[1].Value, clearValue);
                     lineId++;
+                    continue;
+                }
+                if (name == "db")
+                {
+                    if (matches.Count != 3)
+                    {
+                        result.Errors.Add(lineId, "Pseudo operation db needs string and address");
+                        lineId++;
+                        continue;
+                    }
+                    string clearValue = matches[1].Value.Replace("'", string.Empty);
+                    int destination = 0x4000;
+                    try
+                    {
+                        destination = Convert.ToUInt16(matches[2].Value, 16);
+                    }
+                    catch (OverflowException e)
+                    {
+                        result.Errors.Add(lineId, "Expected 16bit address for string literal destination");
+                    }
+
+                    lineId++;
+                    result.StringLiterals.Add(destination, clearValue);
                     continue;
                 }
                 string? error = _checkInputValidity(matches, info, memory);
@@ -487,6 +516,16 @@ namespace Emulator
                 ushort dest = (ushort)result.JumpDestinations[jump.Value];
                 result.CommandBytes[jump.Key] = (byte)(dest & 0xff);
                 result.CommandBytes[jump.Key + 1] = (byte)((dest & 0xff00) >> 8);
+            }
+            int furthestStringAddress = result.StringLiterals.Keys.Max() + result.StringLiterals[result.StringLiterals.Keys.Max()].Length + 1;
+            result.CommandBytes.AddRange(new byte[furthestStringAddress - result.CommandBytes.Count]);
+            foreach ((int addr, string value) in result.StringLiterals)
+            {
+                ushort currentAddress = (ushort)addr;
+                for (int i = 0; i < value.Length; i++)
+                {
+                    result.CommandBytes[currentAddress++] = ((byte)value[i]);
+                }
             }
             result.Success = result.Errors.Count == 0;
             return result;

@@ -1059,14 +1059,14 @@ namespace Emulator
                         if ((Registers.A & 0x1) == 1)
                         {
                             OnInputResetRequested?.Invoke();
-                        
+
                         }
                     }
                     else
                     {
                         SetOut(_memory[(ushort)(ProgramCounter + 1)], Registers.A);
                     }
-                   _programCounter += 2;
+                    _programCounter += 2;
                     break;
                 case 0x2f://cma
                     Registers.A = (byte)(~Registers.A);
