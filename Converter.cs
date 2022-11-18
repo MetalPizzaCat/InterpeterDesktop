@@ -57,7 +57,7 @@ namespace Emulator
 
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex OperationSeparator = new Regex(@"([A-z\d]+)|('(([A-z\d]+)( *|,))+')", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex OperationSeparator = new Regex(@"([A-z\d]+)|('(([A-z\d]+)( *|,)+([A-z\d]+)*)')", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -517,16 +517,19 @@ namespace Emulator
                 result.CommandBytes[jump.Key] = (byte)(dest & 0xff);
                 result.CommandBytes[jump.Key + 1] = (byte)((dest & 0xff00) >> 8);
             }
-            int furthestStringAddress = result.StringLiterals.Keys.Max() + result.StringLiterals[result.StringLiterals.Keys.Max()].Length + 1;
-            result.CommandBytes.AddRange(new byte[furthestStringAddress - result.CommandBytes.Count]);
-            foreach ((int addr, string value) in result.StringLiterals)
+            if (result.StringLiterals.Count > 0)
             {
-                ushort currentAddress = (ushort)addr;
-                for (int i = 0; i < value.Length; i++)
+                int furthestStringAddress = result.StringLiterals.Keys.Max() + result.StringLiterals[result.StringLiterals.Keys.Max()].Length + 1;
+                result.CommandBytes.AddRange(new byte[furthestStringAddress - result.CommandBytes.Count]);
+                foreach ((int addr, string value) in result.StringLiterals)
                 {
-                    result.CommandBytes[currentAddress++] = ((byte)value[i]);
+                    ushort currentAddress = (ushort)addr;
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        result.CommandBytes[currentAddress++] = ((byte)value[i]);
+                    }
+                    result.CommandBytes[currentAddress] = 0;
                 }
-                result.CommandBytes[currentAddress] = 0;
             }
             result.Success = result.Errors.Count == 0;
             return result;
