@@ -273,10 +273,16 @@ namespace Nema
         {
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
-                Emulator.ProcessedCodeInfo code = Emulator.Converter.Prepare(CodeInputBox.Text, _emulator.Memory.MemoryData);
-                _recordErrors(code.Errors);
-                _emulator.SetCode(code);
-                _emulator.ResetProcessor();
+                Emulator.Converter converter = new Emulator.Converter(CodeInputBox.Text, _emulator.Memory.MemoryData);
+                if (converter.Success)
+                {
+                    _emulator.SetCode(converter.Result);
+                    _emulator.ResetProcessor();
+                }
+                else
+                {
+                    _recordErrors(converter.Errors);
+                }
             }
         }
 

@@ -4,15 +4,18 @@ namespace Emulator
 {
     public enum CommandArgumentType
     {
-        RegisterName,
-        Int8,
-        Int16,
-        LabelName
+        RegisterName = 0,
+        Int8 = 1,
+        Int16 = 2,
+        RegisterPairName = 4,
     }
+
     public class CommandInfo
     {
         public string OpCode = "0";
         public List<CommandArgumentType> Arguments = new List<CommandArgumentType>();
+
+        public Dictionary<int, int>? RegisterNameArgumentOffsets;
 
         /// <summary>
         /// User written note that explains what this command does

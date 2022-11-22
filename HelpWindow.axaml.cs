@@ -57,10 +57,7 @@ namespace Nema
                             arguments += "D8";
                             break;
                         case CommandArgumentType.Int16:
-                            arguments += "D16";
-                            break;
-                        case CommandArgumentType.LabelName:
-                            arguments += "Label";
+                            arguments += "Label/D16";
                             break;
                     }
                     arguments += ",";
