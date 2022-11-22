@@ -8,13 +8,16 @@ namespace Emulator
         Int8,
         Int16,
         LabelName,
+        RegisterPairName,
         Address,
     }
-    
+
     public class CommandInfo
     {
         public string OpCode = "0";
         public List<CommandArgumentType> Arguments = new List<CommandArgumentType>();
+
+        public Dictionary<int, int>? RegisterNameArgumentOffsets;
 
         /// <summary>
         /// User written note that explains what this command does

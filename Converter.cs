@@ -56,6 +56,7 @@ namespace Emulator
     {
 
         private static List<string> _registerNames = new List<string> { "b", "c", "d", "e", "h", "l", "m", "a" };
+        private static List<string> _registerPairNames = new List<string> { "b", "d", "h" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex OperationSeparator = new Regex(@"([A-z\d]+)|('(([A-z\d]+)( *|,)+([A-z\d]+)*)')", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -231,236 +232,6 @@ namespace Emulator
                 // handle commands that use different opcodes for combinations of registers
                 switch (name)
                 {
-                    case "mov":
-                        {
-                            byte byteBase = (byte)(0x40 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x8);
-                            byteBase += (byte)_registerNames.IndexOf(matches[2].Value.ToLower());
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "mvi":
-                        {
-                            byte byteBase = (byte)(0x06 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x8);
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        try
-                        {
-                            if (Regex.IsMatch(matches[2].Value, @"(0x((\d|[A-F])(\d|[A-F])?))"))
-                            {
-                                result.CommandBytes.Add(Convert.ToByte(matches[2].Value, 16));//write the argument
-                            }
-                            else
-                            {
-                                result.CommandBytes.Add(Convert.ToByte(matches[2].Value));//write the argument
-                            }
-                        }
-                        catch (OverflowException e)
-                        {
-                            result.Errors.Add(lineId, "Expected 8bit number got 16bit or more");
-                        }
-                        break;
-
-                    case "add":
-                        {
-                            byte byteBase = (byte)(0x80 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "adc":
-                        {
-                            byte byteBase = (byte)(0x88 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "sub":
-                        {
-                            byte byteBase = (byte)(0x90 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "sbb":
-                        {
-                            byte byteBase = (byte)(0x98 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "cmp":
-                        {
-                            byte byteBase = (byte)(0xb8 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "push":
-                        {
-                            byte byteBase = 0xc5;
-                            switch (matches[1].Value)
-                            {
-                                case "b":
-                                    byteBase += 0x00;
-                                    break;
-                                case "d":
-                                    byteBase += 0x10;
-                                    break;
-                                case "h":
-                                    byteBase += 0x20;
-                                    break;
-                            }
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "pop":
-                        {
-                            byte byteBase = 0xc1;
-                            switch (matches[1].Value)
-                            {
-                                case "b":
-                                    byteBase += 0x00;
-                                    break;
-                                case "d":
-                                    byteBase += 0x10;
-                                    break;
-                                case "h":
-                                    byteBase += 0x20;
-                                    break;
-                            }
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "lxi":
-                        {
-                            byte byteBase = 0x01;
-                            switch (matches[1].Value)
-                            {
-                                case "b":
-                                    byteBase += 0x00;
-                                    break;
-                                case "d":
-                                    byteBase += 0x10;
-                                    break;
-                                case "h":
-                                    byteBase += 0x20;
-                                    break;
-                                case "sp":
-                                    byteBase += 0x30;
-                                    break;
-                            }
-                            result.CommandBytes.Add(byteBase);
-                            try
-                            {
-                                ushort val;
-                                if (Regex.IsMatch(matches[2].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))"))
-                                {
-                                    //First store argument's L then H 
-                                    val = Convert.ToUInt16(matches[2].Value, 16);
-
-                                }
-                                else
-                                {
-                                    val = Convert.ToUInt16(matches[2].Value);
-                                }
-                                result.CommandBytes.Add((byte)(val & 0xff));
-                                result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
-                            }
-                            catch (OverflowException e)
-                            {
-                                result.Errors.Add(lineId, "Expected 16bit number got larger");
-                            }
-                        }
-                        break;
-                    case "ora":
-                        {
-                            byte byteBase = (byte)(0xB0 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "xra":
-                        {
-                            byte byteBase = (byte)(0xA8 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "ana":
-                        {
-                            byte byteBase = (byte)(0xA0 + _registerNames.IndexOf(matches[1].Value.ToLower()));
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "inr":
-                        {
-                            byte byteBase = (byte)(0x04 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x08);
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "dcr":
-                        {
-                            byte byteBase = (byte)(0x05 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x08);
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "inx":
-                        {
-                            byte byteBase = 0x03;
-                            switch (matches[1].Value)
-                            {
-                                case "b":
-                                    byteBase += 0x00;
-                                    break;
-                                case "d":
-                                    byteBase += 0x10;
-                                    break;
-                                case "h":
-                                    byteBase += 0x20;
-                                    break;
-                                case "sp":
-                                    byteBase += 0x30;
-                                    break;
-                            }
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-
-                    case "dcx":
-                        {
-                            byte byteBase = 0x0B;
-                            switch (matches[1].Value)
-                            {
-                                case "b":
-                                    byteBase += 0x00;
-                                    break;
-                                case "d":
-                                    byteBase += 0x10;
-                                    break;
-                                case "h":
-                                    byteBase += 0x20;
-                                    break;
-                                case "sp":
-                                    byteBase += 0x30;
-                                    break;
-                            }
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
-                    case "dad":
-                        {
-                            byte byteBase = 0x09;
-                            switch (matches[1].Value)
-                            {
-                                case "b":
-                                    byteBase += 0x00;
-                                    break;
-                                case "d":
-                                    byteBase += 0x10;
-                                    break;
-                                case "h":
-                                    byteBase += 0x20;
-                                    break;
-                                case "sp":
-                                    byteBase += 0x30;
-                                    break;
-                            }
-                            result.CommandBytes.Add(byteBase);
-                        }
-                        break;
                     case "ldax":
                         switch (matches[1].Value)
                         {
@@ -487,11 +258,26 @@ namespace Emulator
                     default:
                         {
                             CommandInfo op = info.Commands[name];
-                            result.CommandBytes.Add(Convert.ToByte(op.OpCode, 16));//write the argument
+                            int opCode = Convert.ToByte(op.OpCode, 16);
+                            int commandLocation = result.CommandBytes.Count;
+                            result.CommandBytes.Add(0x0);//write the argument
                             for (int i = 1; i < matches.Count; i++)
                             {
                                 switch (op.Arguments[i - 1])
                                 {
+                                    case CommandArgumentType.RegisterName:
+                                        {
+                                            opCode += _registerNames.IndexOf(matches[i].Value.ToLower()) * (op?.RegisterNameArgumentOffsets[i - 1] ?? 0);
+                                            result.CommandBytes[commandLocation] = (byte)opCode;
+                                        }
+                                        break;
+                                    case CommandArgumentType.RegisterPairName:
+                                        {
+                                            int id = _registerPairNames.IndexOf(matches[i].Value.ToLower());
+                                            opCode += (id < 0 ? _registerPairNames.Count : id) * (op?.RegisterNameArgumentOffsets[i - 1] ?? 0);
+                                            result.CommandBytes[commandLocation] = (byte)opCode;
+                                        }
+                                        break;
                                     case CommandArgumentType.Int8:
                                         try
                                         {

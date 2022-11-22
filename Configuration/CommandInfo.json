@@ -28,7 +28,10 @@
                 0,
                 1
             ],
-            "OpCode": "0",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 8
+            },
+            "OpCode": "0x06",
             "Note": "Writes a value into the register"
         },
         "mov": {
@@ -36,7 +39,11 @@
                 0,
                 0
             ],
-            "OpCode": "0",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 8,
+                "1" : 1
+            },
+            "OpCode": "0x40",
             "Note": "Copies value from register on the left to register on the right"
         },
         "sta": {
@@ -57,14 +64,20 @@
             "Arguments": [
                 0
             ],
-            "OpCode": "0",
+            "OpCode": "0x80",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            },
             "Note": "Adds value from register to accumulator"
         },
         "adc": {
             "Arguments": [
                 0
             ],
-            "OpCode": "0",
+            "OpCode": "0x88",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            },
             "Note": "Adds value from register to accumulator with carry"
         },
         "adi": {
@@ -85,14 +98,20 @@
             "Arguments": [
                 0
             ],
-            "OpCode": 0,
+            "OpCode": "0x90",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            },
             "Note": "Subtracts value in register from accumulator"
         },
         "sbb": {
             "Arguments": [
                 0
             ],
-            "OpCode": 0,
+            "OpCode": "0x98",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            },
             "Note": "Subtracts value in register from accumulator with carry"
         },
         "sbi": {
@@ -120,7 +139,10 @@
             "Arguments": [
                 0
             ],
-            "OpCode": "0",
+            "OpCode": "0xb8",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            },
             "Note": "Compares accumulator with register"
         },
         "call": {
@@ -297,22 +319,31 @@
         },
         "push": {
             "Arguments": [
-                0
+                4
             ],
-            "OpCode": "0"
+            "OpCode": "0xc5",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 16
+            }
         },
         "pop": {
             "Arguments": [
-                0
+                4
             ],
-            "OpCode": "0"
+            "OpCode": "0xc1",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 16
+            }
         },
         "lxi": {
             "Arguments": [
-                0,
+                4,
                 2
             ],
-            "OpCode": "0"
+            "OpCode": "0x01",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 16
+            }
         },
         "ani": {
             "Arguments": [
@@ -324,7 +355,10 @@
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0xa0",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            }
         },
         "ori": {
             "Arguments": [
@@ -336,7 +370,10 @@
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0xb0",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            }
         },
         "xri": {
             "Arguments": [
@@ -348,7 +385,10 @@
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0xa8",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 1
+            }
         },
         "ral": {
             "Arguments": [],
@@ -370,25 +410,37 @@
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0x04",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 8
+            }
         },
         "dcr": {
             "Arguments": [
                 0
             ],
-            "OpCode": "0"
+            "OpCode": "0x05",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 8
+            }
         },
         "inx": {
             "Arguments": [
-                0
+                4
             ],
-            "OpCode": "0"
+            "OpCode": "0x03",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 16
+            }
         },
         "dcx": {
             "Arguments": [
-                0
+                4
             ],
-            "OpCode": "0"
+            "OpCode": "0x0b",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 16
+            }
         },
         "stax": {
             "Arguments": [
@@ -416,9 +468,12 @@
         },
         "dad": {
             "Arguments": [
-                0
+                4
             ],
-            "OpCode": "0"
+            "OpCode": "0x09",
+            "RegisterNameArgumentOffsets" : {
+                "0" : 16
+            }
         },
         "xthl": {
             "OpCode": "e3"
