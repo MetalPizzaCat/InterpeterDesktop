@@ -147,63 +147,63 @@
         },
         "call": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "cd",
             "Note": "Calls a subroutine"
         },
         "cm": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "fc",
             "Note": "Calls a subroutine if S flag is true"
         },
         "cpe": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "ec",
             "Note": "Calls a subroutine if P flag is true"
         },
         "cc": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "dc",
             "Note": "Calls a subroutine if C flag is true"
         },
         "cz": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "cc",
             "Note": "Calls a subroutine if Z flag is true"
         },
         "cp": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "f4",
             "Note": "Calls a subroutine if S flag is false"
         },
         "cpo": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "e4",
             "Note": "Calls a subroutine if P flag is false"
         },
         "cnc": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "d4",
             "Note": "Calls a subroutine if C flag is false"
         },
         "cnz": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "c4",
             "Note": "Calls a subroutine if Z flag is false"
@@ -253,55 +253,55 @@
         },
         "jmp": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "c3"
         },
         "jm": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "fa"
         },
         "jpe": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "ea"
         },
         "jc": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "da"
         },
         "jz": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "ca"
         },
         "jp": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "f2"
         },
         "jpo": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "e2"
         },
         "jnc": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "d2"
         },
         "jnz": {
             "Arguments": [
-                4
+                2
             ],
             "OpCode": "c2"
         },

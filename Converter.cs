@@ -59,7 +59,9 @@ namespace Emulator
         private static List<string> _registerPairNames = new List<string> { "b", "d", "h" };
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex OperationSeparator = new Regex(@"([A-z\d]+)|('(([A-z\d]+)( *|,)+([A-z\d]+)*)')", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex JumpLabelRegex = new Regex(@"([A-z]+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex LabelDefinitionRegex = new Regex(@"(([A-z]|\d)+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex ShortNumberRegex = new Regex(@"^(0x((\d|[A-F]){1,4}))|(\d{1,5})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex LabelRegex = new Regex(@"([A-z]|\d)+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Checks if given collection of regex matches is a valid operation
@@ -87,13 +89,13 @@ namespace Emulator
                             }
                             break;
                         case CommandArgumentType.Int8:
-                            if (!Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F])?))|(\d{0,3})"))
+                            if (!Regex.IsMatch(input[i].Value, @"(0x(\d|[A-F]){1,2})|(\d{1,3})"))
                             {
                                 return ($"Argument {i - 1} can only contain numbers");
                             }
                             break;
                         case CommandArgumentType.Int16:
-                            if (!Regex.IsMatch(input[i].Value, "[A-z]+") && !Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))|(\d{0,5})"))
+                            if (!Regex.IsMatch(input[i].Value, "[A-z]+") && !ShortNumberRegex.IsMatch(input[i].Value))
                             {
                                 return ($"Argument {i - 1} can only contain name of the label or 16bit address");
                             }
@@ -141,9 +143,9 @@ namespace Emulator
                     lineId++;
                     continue;
                 }
-                if (JumpLabelRegex.IsMatch(cleanLine))
+                if (LabelDefinitionRegex.IsMatch(cleanLine))
                 {
-                    result.JumpDestinations.Add(JumpLabelRegex.Match(cleanLine).Value, result.CommandBytes.Count);
+                    result.JumpDestinations.Add(LabelDefinitionRegex.Match(cleanLine).Value, result.CommandBytes.Count);
                     lineId++;
                     continue;
                 }
@@ -255,7 +257,7 @@ namespace Emulator
                             CommandInfo op = info.Commands[name];
                             int opCode = Convert.ToByte(op.OpCode, 16);
                             int commandLocation = result.CommandBytes.Count;
-                            result.CommandBytes.Add(0x0);//write the argument
+                            result.CommandBytes.Add((byte)opCode);
                             for (int i = 1; i < matches.Count; i++)
                             {
                                 switch (op.Arguments[i - 1])
@@ -291,37 +293,49 @@ namespace Emulator
                                         }
                                         break;
                                     case CommandArgumentType.Int16:
-                                        try
+                                        if (ShortNumberRegex.IsMatch(matches[i].Value))
                                         {
-                                            ushort val;
-                                            if (Regex.IsMatch(matches[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))"))
+                                            try
                                             {
-                                                //First store argument's L then H 
-                                                val = Convert.ToUInt16(matches[i].Value, 16);
+                                                ushort val;
+                                                if (Regex.IsMatch(matches[i].Value, @"(0x((\d|[A-F]){1,4}))"))
+                                                {
+                                                    //First store argument's L then H 
+                                                    val = Convert.ToUInt16(matches[i].Value, 16);
 
+                                                }
+                                                else
+                                                {
+                                                    val = Convert.ToUInt16(matches[i].Value);
+                                                }
+                                                result.CommandBytes.Add((byte)(val & 0xff));
+                                                result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
                                             }
-                                            else
+                                            catch (OverflowException e)
                                             {
-                                                val = Convert.ToUInt16(matches[i].Value);
+                                                result.Errors.Add(lineId, "Expected 16bit number got larger");
                                             }
-                                            result.CommandBytes.Add((byte)(val & 0xff));
-                                            result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                                            break;
                                         }
-                                        catch (OverflowException e)
+                                        if (LabelRegex.IsMatch(matches[i].Value))
                                         {
-                                            result.Errors.Add(lineId, "Expected 16bit number got larger");
+                                            referredJumps.Add(lineId, matches[i].Value);
+                                            jumps.Add(result.CommandBytes.Count, matches[i].Value);
+                                            result.CommandBytes.Add(0);
+                                            result.CommandBytes.Add(0);
+                                            break;
                                         }
                                         break;
                                 }
                             }
-                        }
+                        }/*
                         if (info.JumpCommands.Contains(name))
                         {
                             referredJumps.Add(lineId, matches[1].Value);
                             jumps.Add(result.CommandBytes.Count, matches[1].Value);
                             result.CommandBytes.Add(0);
                             result.CommandBytes.Add(0);
-                        }
+                        }*/
                         break;
                 }
                 address += info.Commands[name].Arguments.Count + 1;
