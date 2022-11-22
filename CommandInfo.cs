@@ -7,8 +7,10 @@ namespace Emulator
         RegisterName,
         Int8,
         Int16,
-        LabelName
+        LabelName,
+        Address,
     }
+    
     public class CommandInfo
     {
         public string OpCode = "0";

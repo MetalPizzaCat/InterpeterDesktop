@@ -86,26 +86,39 @@ namespace Emulator
                             }
                             break;
                         case CommandArgumentType.Int8:
-                            if (!Regex.IsMatch(input[i].Value, @"\d"))
+                            if (!Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F])?))|(\d{0,3})"))
                             {
                                 return ($"Argument {i - 1} can only contain numbers");
                             }
                             break;
                         case CommandArgumentType.Int16:
-                            if (!Regex.IsMatch(input[i].Value, @"\d"))
+                            if (!Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))|(\d{0,5})"))
                             {
                                 return ($"Argument {i - 1} can only contain numbers");
                             }
-                            ushort addr = Convert.ToUInt16(input[i].Value, 16);
-                            if (addr >= memory.TotalSize)
+                            try
                             {
-                                return $"Argument {i - 1} is an address that points outside of allowed memory";
+                                ushort addr = Convert.ToUInt16(input[i].Value, 16);
+                                if (addr > memory.TotalSize)
+                                {
+                                    return $"Argument {i - 1} is an address that points outside of allowed memory";
+                                }
+                            }
+                            catch (OverflowException e)
+                            {
+                                return $"Argument {i - 1} is outside of 16bit range";
                             }
                             break;
                         case CommandArgumentType.LabelName:
                             if (!Regex.IsMatch(input[i].Value, "[A-z]+"))
                             {
-                                return ($"Argument {i - 1} can only contain one letter: name of the register");
+                                return ($"Argument {i - 1} can only contain name of the label");
+                            }
+                            break;
+                        case CommandArgumentType.Address:
+                            if (!Regex.IsMatch(input[i].Value, "[A-z]+") && !Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))|(\d{0,5})"))
+                            {
+                                return ($"Argument {i - 1} can only contain name of the label or 16bit address");
                             }
                             break;
                     }
@@ -230,7 +243,21 @@ namespace Emulator
                             byte byteBase = (byte)(0x06 + _registerNames.IndexOf(matches[1].Value.ToLower()) * 0x8);
                             result.CommandBytes.Add(byteBase);
                         }
-                        result.CommandBytes.Add(Convert.ToByte(matches[2].Value, 16));//write the argument
+                        try
+                        {
+                            if (Regex.IsMatch(matches[2].Value, @"(0x((\d|[A-F])(\d|[A-F])?))"))
+                            {
+                                result.CommandBytes.Add(Convert.ToByte(matches[2].Value, 16));//write the argument
+                            }
+                            else
+                            {
+                                result.CommandBytes.Add(Convert.ToByte(matches[2].Value));//write the argument
+                            }
+                        }
+                        catch (OverflowException e)
+                        {
+                            result.Errors.Add(lineId, "Expected 8bit number got 16bit or more");
+                        }
                         break;
 
                     case "add":
@@ -318,9 +345,26 @@ namespace Emulator
                                     break;
                             }
                             result.CommandBytes.Add(byteBase);
-                            ushort val = Convert.ToUInt16(matches[2].Value, 16);
-                            result.CommandBytes.Add((byte)(val & 0xff));
-                            result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                            try
+                            {
+                                ushort val;
+                                if (Regex.IsMatch(matches[2].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))"))
+                                {
+                                    //First store argument's L then H 
+                                    val = Convert.ToUInt16(matches[2].Value, 16);
+
+                                }
+                                else
+                                {
+                                    val = Convert.ToUInt16(matches[2].Value);
+                                }
+                                result.CommandBytes.Add((byte)(val & 0xff));
+                                result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
+                            }
+                            catch (OverflowException e)
+                            {
+                                result.Errors.Add(lineId, "Expected 16bit number got larger");
+                            }
                         }
                         break;
                     case "ora":
@@ -451,7 +495,14 @@ namespace Emulator
                                     case CommandArgumentType.Int8:
                                         try
                                         {
-                                            result.CommandBytes.Add(Convert.ToByte(matches[i].Value, 16));//write the argument
+                                            if (Regex.IsMatch(matches[i].Value, @"(0x((\d|[A-F])(\d|[A-F])?))"))
+                                            {
+                                                result.CommandBytes.Add(Convert.ToByte(matches[i].Value, 16));//write the argument
+                                            }
+                                            else
+                                            {
+                                                result.CommandBytes.Add(Convert.ToByte(matches[i].Value));//write the argument
+                                            }
                                         }
                                         catch (OverflowException e)
                                         {
@@ -461,8 +512,17 @@ namespace Emulator
                                     case CommandArgumentType.Int16:
                                         try
                                         {
-                                            //First store argument's L then H 
-                                            ushort val = Convert.ToUInt16(matches[i].Value, 16);
+                                            ushort val;
+                                            if (Regex.IsMatch(matches[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))"))
+                                            {
+                                                //First store argument's L then H 
+                                                val = Convert.ToUInt16(matches[i].Value, 16);
+
+                                            }
+                                            else
+                                            {
+                                                val = Convert.ToUInt16(matches[i].Value);
+                                            }
                                             result.CommandBytes.Add((byte)(val & 0xff));
                                             result.CommandBytes.Add((byte)((val & 0xff00) >> 8));
                                         }
