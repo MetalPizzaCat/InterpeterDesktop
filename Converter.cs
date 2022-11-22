@@ -93,30 +93,6 @@ namespace Emulator
                             }
                             break;
                         case CommandArgumentType.Int16:
-                            if (!Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))|(\d{0,5})"))
-                            {
-                                return ($"Argument {i - 1} can only contain numbers");
-                            }
-                            try
-                            {
-                                ushort addr = Convert.ToUInt16(input[i].Value, 16);
-                                if (addr > memory.TotalSize)
-                                {
-                                    return $"Argument {i - 1} is an address that points outside of allowed memory";
-                                }
-                            }
-                            catch (OverflowException e)
-                            {
-                                return $"Argument {i - 1} is outside of 16bit range";
-                            }
-                            break;
-                        case CommandArgumentType.LabelName:
-                            if (!Regex.IsMatch(input[i].Value, "[A-z]+"))
-                            {
-                                return ($"Argument {i - 1} can only contain name of the label");
-                            }
-                            break;
-                        case CommandArgumentType.Address:
                             if (!Regex.IsMatch(input[i].Value, "[A-z]+") && !Regex.IsMatch(input[i].Value, @"(0x((\d|[A-F])(\d|[A-F]){0,3}))|(\d{0,5})"))
                             {
                                 return ($"Argument {i - 1} can only contain name of the label or 16bit address");
@@ -192,7 +168,7 @@ namespace Emulator
                     lineId++;
                     continue;
                 }
-                if (name == "db")
+                if (name == "ds")
                 {
                     if (matches.Count != 3)
                     {
@@ -215,6 +191,28 @@ namespace Emulator
                     result.StringLiterals.Add(destination, clearValue);
                     continue;
                 }
+                if (name == "db")
+                {
+                    foreach (Match match in matches.Skip(1))
+                    {
+                        try
+                        {
+                            if (Regex.IsMatch(match.Value, @"(0x((\d|[A-F])(\d|[A-F])?))"))
+                            {
+                                result.CommandBytes.Add(Convert.ToByte(match.Value, 16));//write the argument
+                            }
+                            else
+                            {
+                                result.CommandBytes.Add(Convert.ToByte(match.Value));//write the argument
+                            }
+                        }
+                        catch (OverflowException e)
+                        {
+                            result.Errors.Add(lineId, "Expected 8bit number got 16bit or more");
+                        }
+                    }
+                    continue;
+                }
                 string? error = _checkInputValidity(matches, info, memory);
                 if (error != null)
                 {
@@ -222,13 +220,10 @@ namespace Emulator
                     lineId++;
                     continue;
                 }
-
                 if (info.StaticAddressCommands.Contains(name))
                 {
                     referredAddresses.Add(lineId, Convert.ToUInt16(matches[1].Value, 16));
                 }
-
-
                 // handle commands that use different opcodes for combinations of registers
                 switch (name)
                 {

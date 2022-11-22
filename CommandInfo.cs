@@ -4,12 +4,10 @@ namespace Emulator
 {
     public enum CommandArgumentType
     {
-        RegisterName,
-        Int8,
-        Int16,
-        LabelName,
-        RegisterPairName,
-        Address,
+        RegisterName = 0,
+        Int8 = 1,
+        Int16 = 2,
+        RegisterPairName = 4,
     }
 
     public class CommandInfo
