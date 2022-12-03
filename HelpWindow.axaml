@@ -16,7 +16,11 @@
       <TextBlock HorizontalAlignment="Center">Licensed under GPL-V2</TextBlock>
       <TextBlock HorizontalAlignment="Center">https://github.com/MetalPizzaCat/NEMA-8</TextBlock>
     </StackPanel>
-    <DataGrid Items="{Binding Commands}" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Name="CommandTable" AutoGenerateColumns = "True">
-    </DataGrid>
+    <TextBlock DockPanel.Dock="Top">Memory data</TextBlock>
+    <StackPanel DockPanel.Dock="Top">
+      <TextBlock HorizontalAlignment="Left">"Out" memory addres : 0xefd0</TextBlock>
+      <TextBlock HorizontalAlignment="Left">RAM start: 0x5000</TextBlock>
+    </StackPanel>
+    <DataGrid Items="{Binding Commands}" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Name="CommandTable" AutoGenerateColumns="True"></DataGrid>
   </DockPanel>
 </Window>

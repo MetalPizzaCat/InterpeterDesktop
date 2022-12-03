@@ -190,7 +190,7 @@ namespace Emulator
         {
             try
             {
-                if (Regex.IsMatch(value, @"(0x((\d|[A-F])(\d|[A-F])?))"))
+                if (Regex.IsMatch(value, @"(0x((\d|[A-F]|[a-f])(\d|[A-F]|[a-f])?))"))
                 {
                     _result.CommandBytes.Add(Convert.ToByte(value, 16));//write the argument
                 }
@@ -212,7 +212,7 @@ namespace Emulator
                 try
                 {
                     ushort val;
-                    if (Regex.IsMatch(value, @"(0x((\d|[A-F]){1,4}))"))
+                    if (Regex.IsMatch(value, @"(0x((\d|[A-F]|[a-f]){1,4}))"))
                     {
                         //First store argument's L then H 
                         val = Convert.ToUInt16(value, 16);
