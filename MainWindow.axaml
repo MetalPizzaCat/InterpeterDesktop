@@ -15,22 +15,35 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_Open    Ctrl+O" Command="{Binding _loadFile}" HotKey="Ctrl+O" />
                 <MenuItem Header="_Open    Ctrl+N" Command="{Binding _newFile}" HotKey="Ctrl+N" />
-                <MenuItem Header="_Save    Ctrl+S" Command="{Binding _saveFile}" CommandParameter="False" HotKey="Ctrl+S" />
-                <MenuItem Header="Save _as    Ctrl+Shift+S" Command="{Binding _saveFile}" CommandParameter="True" HotKey="Ctrl+Shift+S" />
+                <MenuItem Header="_Save    Ctrl+S" Command="{Binding _saveFile}"
+                    CommandParameter="False" HotKey="Ctrl+S" />
+                <MenuItem Header="Save _as    Ctrl+Shift+S" Command="{Binding _saveFile}"
+                    CommandParameter="True" HotKey="Ctrl+Shift+S" />
                 <Separator />
-                <MenuItem Header="_Load ROM     Ctrl+Shift+G" ToolTip.Tip="Load data from ROM file to memory" Command="{Binding _loadRom}" HotKey="Ctrl+Shift+G" />
-                <MenuItem Header="_Dump ROM     Ctrl+Shift+D" ToolTip.Tip="Dump current contents of ROM into a file" Command="{Binding _dumpRom}" HotKey="Ctrl+Shift+D" />
+                <MenuItem Header="_Load ROM     Ctrl+Shift+G"
+                    ToolTip.Tip="Load data from ROM file to memory" Command="{Binding _loadRom}"
+                    HotKey="Ctrl+Shift+G" />
+                <MenuItem Header="_Dump ROM     Ctrl+Shift+D"
+                    ToolTip.Tip="Dump current contents of ROM into a file"
+                    Command="{Binding _dumpRom}" HotKey="Ctrl+Shift+D" />
                 <Separator />
-                <MenuItem Header="_Dump RAM" ToolTip.Tip="Dump current contents of RAM into a file for viewing in hex editors" Command="{Binding _dumpRam}" />
+                <MenuItem Header="_Dump RAM"
+                    ToolTip.Tip="Dump current contents of RAM into a file for viewing in hex editors"
+                    Command="{Binding _dumpRam}" />
                 <Separator />
                 <MenuItem Header="_Quit" Click="_onExitRequested" />
             </MenuItem>
             <MenuItem Header="_Emulation">
-                <MenuItem Header="_Run     F5" ToolTip.Tip="Assembles and runs code" Command="{Binding _run}" HotKey="F5" />
-                <MenuItem Header="_Step     Ctrl+F5" ToolTip.Tip="Steps through the code" Command="{Binding _step}" HotKey="Ctrl+F5" />
-                <MenuItem Header="_Assemble     Ctrl+Shift+B" ToolTip.Tip="Assembles the code" Command="{Binding _assemble}" HotKey="Ctrl+Shift+B" />
-                <MenuItem Header="_Stop     F6" ToolTip.Tip="Stops the execution" Command="{Binding _stopEmulation}" HotKey="F6" />
-                <MenuItem Header="_Clear ROM     Ctrl+F7" ToolTip.Tip="Clears ROM" Command="{Binding _clearRom}" HotKey="Ctrl+F7" />
+                <MenuItem Header="_Run     F5" ToolTip.Tip="Assembles and runs code"
+                    Command="{Binding _run}" HotKey="F5" />
+                <MenuItem Header="_Step     Ctrl+F5" ToolTip.Tip="Steps through the code"
+                    Command="{Binding _step}" HotKey="Ctrl+F5" />
+                <MenuItem Header="_Assemble     Ctrl+Shift+B" ToolTip.Tip="Assembles the code"
+                    Command="{Binding _assemble}" HotKey="Ctrl+Shift+B" />
+                <MenuItem Header="_Stop     F6" ToolTip.Tip="Stops the execution"
+                    Command="{Binding _stopEmulation}" HotKey="F6" />
+                <MenuItem Header="_Clear ROM     Ctrl+F7" ToolTip.Tip="Clears ROM"
+                    Command="{Binding _clearRom}" HotKey="Ctrl+F7" />
             </MenuItem>
             <MenuItem Header="_Help    F1" Command="{Binding _displayHelp}" HotKey="F1" />
             <MenuItem Header="_Settings    F2" Command="{Binding _displaySettings}" HotKey="F2" />
@@ -45,19 +58,26 @@
                                 HorizontalAlignment="Left"
                                 Margin="2 6 2 2"
                                 Text="{Binding LineNumberText}"
-                                MinWidth="10" />
+                                MinWidth="10"
+                                FontSize="16" />
                             <TextBox DockPanel.Dock="Right"
                                 Name="CodeInputBox"
                                 TextWrapping="Wrap"
                                 AcceptsReturn="True"
                                 MinHeight="450"
                                 MinWidth="200"
+                                FontSize="16"
                                 Text="{Binding CodeText}" />
                         </DockPanel>
                     </ScrollViewer>
                 </Border>
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top">Ошибки: </TextBlock>
+                </DockPanel>
                 <!-- List for displaying compilation, syntax, etc. errors-->
-                <ScrollViewer Height="100" MaxHeight="100" Margin="5" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+                <ScrollViewer DockPanel.Dock="Top" Height="100" MaxHeight="100" Margin="5"
+                    VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+
                     <TextBlock x:Name="ErrorMsgBox" />
                 </ScrollViewer>
             </StackPanel>
@@ -126,7 +146,8 @@
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
-                        <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display out as ASCII text</CheckBox>
+                        <CheckBox DockPanel.Dock="Left" IsChecked="{Binding DisplayOutAsText}">Display
+                            out as ASCII text</CheckBox>
                         <TextBlock Name="ProgramCounterLabel" Text="{Binding ProgramCounter}" />
                     </DockPanel>
                 </DockPanel>
@@ -134,9 +155,11 @@
                 <emul:InputPorts DockPanel.Dock="Top" Name="InputTable" />
                 <TextBlock DockPanel.Dock="Top">Memory</TextBlock>
                 <!-- Using data grid to dispaly memory cells-->
-                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch" DockPanel.Dock="Top" CanUserSortColumns="False">
+                <DataGrid FrozenColumnCount="1" Name="MemoryGrid" HorizontalAlignment="Stretch"
+                    DockPanel.Dock="Top" CanUserSortColumns="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Адрес" Binding="{Binding Address}"
+                            IsReadOnly="True" />
                         <DataGridTextColumn Header="0" Binding="{ Binding X0 }" />
                         <DataGridTextColumn Header="1" Binding="{ Binding X1 }" />
                         <DataGridTextColumn Header="2" Binding="{ Binding X2 }" />

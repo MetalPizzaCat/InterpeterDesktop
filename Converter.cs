@@ -62,7 +62,7 @@ namespace Emulator
         public static Regex CommentRegex = new Regex("( *)(;)(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex OperationSeparator = new Regex(@"([A-z\d]+)|('(([A-z\d]+)( *|,)+([A-z\d]+)*)')", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex LabelDefinitionRegex = new Regex(@"(([A-z]|\d)+(?=:))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex ShortNumberRegex = new Regex(@"^(0x((\d|[A-F]){1,4}))|(\d{1,5})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex ShortNumberRegex = new Regex(@"^((0x((\d|[A-F]){1,4}))|(\d{1,5}))$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Regex LabelRegex = new Regex(@"([A-z]|\d)+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public Converter(string code, MemorySegmentationData memory)
@@ -203,6 +203,10 @@ namespace Emulator
             {
                 _result.Errors.Add(lineId, "Expected 8bit number got 16bit or more");
             }
+            catch (System.FormatException e)
+            {
+                _result.Errors.Add(lineId, "Expected 8bit number as an argument, got invalid value");
+            }
         }
 
         private void _addShortToResult(int lineId, string value)
@@ -229,9 +233,12 @@ namespace Emulator
                 {
                     _result.Errors.Add(lineId, "Expected 16bit number got larger");
                 }
-                return;
+                // catch (System.FormatException e)
+                // {
+                //     _result.Errors.Add(lineId, "Expected 16bit number as an argument, got invalid value");
+                // }
             }
-            if (LabelRegex.IsMatch(value))
+            else if (LabelRegex.IsMatch(value))
             {
                 _referredJumps.Add(lineId, value);
                 _jumps.Add(_result.CommandBytes.Count, value);
@@ -239,15 +246,28 @@ namespace Emulator
                 _result.CommandBytes.Add(0);
                 return;
             }
+            else
+            {
+                _result.Errors.Add(lineId, "Expected 16bit address value");
+            }
         }
 
         private void _applyJumps()
         {
-            foreach (var jump in _referredJumps)
+            foreach (var (line, dest) in _referredJumps)
             {
-                if (!_result.JumpDestinations.ContainsKey(jump.Value))
+                if (!_result.Errors.ContainsKey(line))
                 {
-                    _result.Errors.Add(jump.Key, $"Invalid jump destination. No label \"{jump.Value}\" is present in the code");
+                    // handle a bug where sta can cause two errors for the price of one
+                    // passing invalid value(such as df5000) to sta as argument would cause error of invalid argument
+                    // and because it expects 16bit value it would make it think that it's an address, which if address is not present
+                    // would cause another issue
+                    // system is not meant to handle more then one error per line because i'm too lazy to fix it
+                    if (_result.Errors.ContainsKey(line)) 
+                    {
+                        continue;
+                    }
+                    _result.Errors.Add(line, $"Invalid jump destination. No label \"{dest}\" is present in the code");
                 }
             }
 
@@ -267,9 +287,9 @@ namespace Emulator
         {
             foreach (var addresses in _referredAddresses)
             {
-                if (addresses.Value < _memory.RomSize)
+                if (addresses.Value <= _memory.RomSize)
                 {
-                    _result.Errors.Add(addresses.Key, $"Illegal write address.  0000 to {(_memory.RomSize).ToString("X4")} is READ only memory");
+                    _result.Errors.Add(addresses.Key, $"Illegal write address.  0x0000 to 0x{(_memory.RomSize).ToString("X4")} is READ only memory");
                 }
 #if FORBID_WRITES_OUTSIDE_RAM
                 else if (addresses.Value < memory.RamStart || addresses.Value > memory.RamEnd)
@@ -295,6 +315,36 @@ namespace Emulator
                     }
                     _result.CommandBytes[currentAddress] = 0;
                 }
+            }
+        }
+
+        private void _addAddress(int lineId, string value)
+        {
+            if (ShortNumberRegex.IsMatch(value))
+            {
+                try
+                {
+                    ushort val;
+                    if (Regex.IsMatch(value, @"(0x((\d|[A-F]|[a-f]){1,4}))"))
+                    {
+                        //First store argument's L then H 
+                        val = Convert.ToUInt16(value, 16);
+
+                    }
+                    else
+                    {
+                        val = Convert.ToUInt16(value);
+                    }
+                    _referredAddresses.Add(lineId, val);
+                }
+                catch (OverflowException e)
+                {
+                    _result.Errors.Add(lineId, "Expected 16bit number got larger");
+                }
+            }
+            else
+            {
+                _result.Errors.Add(lineId, "Expected 16bit address value");
             }
         }
 
@@ -366,7 +416,7 @@ namespace Emulator
                 }
                 if (_info.StaticAddressCommands.Contains(name))
                 {
-                    _referredAddresses.Add(lineId, Convert.ToUInt16(matches[1].Value, 16));
+                    _addAddress(lineId, matches[1].Value);
                 }
                 //handle stax and ldax separetely cause they are only two commands that share this special argument type
                 if (name == "ldax")

@@ -115,12 +115,19 @@ namespace Nema
         private void _displayFatalError(string msg)
         {
             ErrorMsgBox.Text = msg;
-            ErrorMsgBox.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.DarkRed);
+            ErrorMsgBox.Foreground= new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red);
         }
         private void _displayErrors(IEnumerable<string> errors)
         {
             ErrorMsgBox.Text = string.Join("\n", errors);
-            ErrorMsgBox.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.White);
+            ErrorMsgBox.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Black);
+        }
+
+        private void _clearErrors()
+        {
+            ErrorMsgBox.Text = string.Empty;
+            ErrorMsgBox.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Black);
+            _errors.Clear();
         }
 
         public async Task RunEmulator()
@@ -153,7 +160,7 @@ namespace Nema
 
         private void _recordErrors(Dictionary<int, string> errors)
         {
-            _errors.Clear();
+            _clearErrors();
             foreach (KeyValuePair<int, string> error in errors)
             {
                 _errors.Add($"Line: {error.Key}. Error: {error.Value}");
@@ -274,6 +281,7 @@ namespace Nema
             if (!string.IsNullOrWhiteSpace(CodeInputBox.Text))
             {
                 Emulator.Converter converter = new Emulator.Converter(CodeInputBox.Text, _emulator.Memory.MemoryData);
+                _clearErrors();
                 if (converter.Success)
                 {
                     _emulator.SetCode(converter.Result);
