@@ -147,13 +147,17 @@ namespace Emulator
             {
                 try
                 {
-                    if (Regex.IsMatch(match.Value, @"(0x((\d|[A-F])(\d|[A-F])?))"))
+                    if (ShortNumberRegex.IsMatch(match.Value))
                     {
                         _result.CommandBytes.Add(Convert.ToByte(match.Value, 16));//write the argument
                     }
-                    else
+                    else if (Regex.IsMatch(match.Value, @"(0x(\d|[A-F]){1,2})|(\d{1,3})"))
                     {
                         _result.CommandBytes.Add(Convert.ToByte(match.Value));//write the argument
+                    }
+                    else
+                    {
+                        _result.Errors.Add(lineId, "Unexpected value encountered");
                     }
                 }
                 catch (OverflowException e)
@@ -167,7 +171,7 @@ namespace Emulator
         {
             if (matches.Count != 3)
             {
-                _result.Errors.Add(lineId, "Pseudo operation db needs string and address");
+                _result.Errors.Add(lineId, "Pseudo operation ds needs string and address");
                 lineId++;
                 return;
             }
@@ -256,14 +260,14 @@ namespace Emulator
         {
             foreach (var (line, dest) in _referredJumps)
             {
-                if (!_result.Errors.ContainsKey(line))
+                if (!_result.JumpDestinations.ContainsKey(dest))
                 {
                     // handle a bug where sta can cause two errors for the price of one
                     // passing invalid value(such as df5000) to sta as argument would cause error of invalid argument
                     // and because it expects 16bit value it would make it think that it's an address, which if address is not present
                     // would cause another issue
                     // system is not meant to handle more then one error per line because i'm too lazy to fix it
-                    if (_result.Errors.ContainsKey(line)) 
+                    if (_result.JumpDestinations.ContainsKey(dest))
                     {
                         continue;
                     }

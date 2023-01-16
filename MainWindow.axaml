@@ -139,7 +139,7 @@
                         </StackPanel>
                     </DockPanel>
                     <DockPanel DockPanel.Dock="Right">
-                        <ItemsControl Items="{Binding Output}">
+                        <ItemsControl Items="{Binding Output}" FontSize="32">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal" Spacing="1" />
